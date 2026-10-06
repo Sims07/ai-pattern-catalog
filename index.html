@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Architecture Patterns & Enterprise FinOps Catalog</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        finops: '#10b981',
+                        obs: '#8b5cf6',
+                        rag: '#3b82f6',
+                        judge: '#f59e0b',
+                        agent: '#ec4899',
+                        sec: '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(51, 65, 85, 0.8);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white"
+      x-data="patternCatalog()"
+      x-init="initApp()">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 border-b border-slate-800 glass-panel">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 rounded-xl shadow-lg shadow-sky-500/20">
+                    <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        AI Architecture Patterns & Enterprise FinOps
+                    </h1>
+                    <p class="text-xs text-slate-400">Référentiel des Design Patterns GenAI, Gravitee, Kafka & Spring Boot</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button @click="currentView = 'catalog'" 
+                        :class="currentView === 'catalog' ? 'bg-slate-800 text-sky-400 border-sky-500/30' : 'text-slate-400 hover:text-white border-transparent'"
+                        class="px-3 py-1.5 rounded-lg border text-sm font-medium transition flex items-center gap-2">
+                    <i data-lucide="grid" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Catalogue</span>
+                </button>
+                <button @click="currentView = 'compare'" 
+                        :class="currentView === 'compare' ? 'bg-slate-800 text-sky-400 border-sky-500/30' : 'text-slate-400 hover:text-white border-transparent'"
+                        class="px-3 py-1.5 rounded-lg border text-sm font-medium transition flex items-center gap-2 relative">
+                    <i data-lucide="columns-2" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Comparateur</span>
+                    <span x-show="selectedForCompare.length > 0" 
+                          x-text="selectedForCompare.length"
+                          class="bg-sky-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold"></span>
+                </button>
+                <button @click="currentView = 'finops'" 
+                        :class="currentView === 'finops' ? 'bg-slate-800 text-emerald-400 border-emerald-500/30' : 'text-slate-400 hover:text-white border-transparent'"
+                        class="px-3 py-1.5 rounded-lg border text-sm font-medium transition flex items-center gap-2">
+                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Simulateur FinOps</span>
+                </button>
+                <button @click="currentView = 'glossary'" 
+                        :class="currentView === 'glossary' ? 'bg-slate-800 text-purple-400 border-purple-500/30' : 'text-slate-400 hover:text-white border-transparent'"
+                        class="px-3 py-1.5 rounded-lg border text-sm font-medium transition flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Glossaire IA</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- VIEW 1: CATALOGUE VIEW -->
+        <div x-show="currentView === 'catalog'" class="space-y-6">
+            
+            <!-- Global Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 rounded-xl border border-slate-800/80">
+                    <div class="text-xs text-slate-400 font-medium">Patterns Référencés</div>
+                    <div class="text-2xl font-bold text-white mt-1" x-text="patterns.length"></div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-slate-800/80">
+                    <div class="text-xs text-slate-400 font-medium">Catégories d'Architecture</div>
+                    <div class="text-2xl font-bold text-sky-400 mt-1" x-text="categories.length"></div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-slate-800/80">
+                    <div class="text-xs text-slate-400 font-medium">Patterns Haute Économie FinOps</div>
+                    <div class="text-2xl font-bold text-emerald-400 mt-1" x-text="patterns.filter(p => p.finopsImpact === 'High' || p.finopsImpact === 'Very High').length"></div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border border-slate-800/80">
+                    <div class="text-xs text-slate-400 font-medium">Cible Déploiement</div>
+                    <div class="text-2xl font-bold text-purple-400 mt-1">GitHub Pages Ready</div>
+                </div>
+            </div>
+
+            <!-- Filters & Search Toolbar -->
+            <div class="glass-panel p-4 rounded-2xl border border-slate-800 space-y-4">
+                <div class="flex flex-col md:flex-row gap-4 justify-between">
+                    <!-- Search input -->
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" 
+                               x-model="searchQuery" 
+                               placeholder="Rechercher un pattern (ex: GraphRAG, PII Vaulting, Semantic Cache, Kafka, Spring Boot)..." 
+                               class="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-700/60 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-sm">
+                    </div>
+
+                    <!-- Filter Dropdowns -->
+                    <div class="flex flex-wrap gap-2">
+                        <select x-model="filterComplexity" class="bg-slate-900 border border-slate-700/60 text-slate-300 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="">Toutes complexités</option>
+                            <option value="Faible">Complexité: Faible</option>
+                            <option value="Moyenne">Complexité: Moyenne</option>
+                            <option value="Élevée">Complexité: Élevée</option>
+                        </select>
+
+                        <select x-model="filterFinops" class="bg-slate-900 border border-slate-700/60 text-slate-300 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="">Tous impacts FinOps</option>
+                            <option value="Very High">FinOps: Trés Élevé (30%+)</option>
+                            <option value="High">FinOps: Élevé</option>
+                            <option value="Medium">FinOps: Modéré</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Category Pills -->
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800">
+                    <button @click="selectedCategory = 'ALL'"
+                            :class="selectedCategory === 'ALL' ? 'bg-sky-500 text-white font-semibold' : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
+                            class="px-3 py-1.5 rounded-lg text-xs transition">
+                        Tous (<span x-text="patterns.length"></span>)
+                    </button>
+                    <template x-for="cat in categories" :key="cat.id">
+                        <button @click="selectedCategory = cat.id"
+                                :class="selectedCategory === cat.id ? cat.activeBg + ' text-white font-semibold' : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
+                                class="px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full" :class="cat.dotColor"></span>
+                            <span x-text="cat.name"></span>
+                            <span class="opacity-60 text-[10px]" x-text="'(' + patterns.filter(p => p.category === cat.id).length + ')'"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Pattern Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="pattern in filteredPatterns" :key="pattern.id">
+                    <div class="glass-panel rounded-2xl border border-slate-800 hover:border-slate-700 transition duration-200 flex flex-col justify-between overflow-hidden group">
+                        
+                        <!-- Card Header -->
+                        <div class="p-5 space-y-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wider uppercase"
+                                      :class="getCategoryBadgeClass(pattern.category)"
+                                      x-text="getCategoryName(pattern.category)">
+                                </span>
+
+                                <button @click="toggleCompare(pattern.id)"
+                                        :title="selectedForCompare.includes(pattern.id) ? 'Retirer du comparateur' : 'Ajouter au comparateur'"
+                                        class="text-slate-500 hover:text-sky-400 transition p-1">
+                                    <i data-lucide="columns-2" class="w-4 h-4" :class="selectedForCompare.includes(pattern.id) ? 'text-sky-400 fill-sky-400/20' : ''"></i>
+                                </button>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-100 group-hover:text-sky-400 transition" x-text="pattern.name"></h3>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed" x-text="pattern.shortDesc"></p>
+                            </div>
+
+                            <!-- Metrics Chips -->
+                            <div class="flex flex-wrap gap-2 pt-2">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-slate-900 text-slate-300 border border-slate-800">
+                                    <i data-lucide="layers" class="w-3 h-3 text-slate-400"></i>
+                                    <span x-text="'Complexité: ' + pattern.complexity"></span>
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
+                                    <i data-lucide="piggy-bank" class="w-3 h-3 text-emerald-400"></i>
+                                    <span x-text="'FinOps: ' + pattern.finopsImpact"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer / Quick Action -->
+                        <div class="px-5 py-3 bg-slate-900/60 border-t border-slate-800/80 flex items-center justify-between">
+                            <span class="text-xs text-slate-500 font-mono" x-text="pattern.tools[0]"></span>
+                            <button @click="openModal(pattern)" 
+                                    class="text-xs font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1 transition">
+                                Fiche Architecture & Gravitee/Kafka/Spring
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="filteredPatterns.length === 0" class="text-center py-16 glass-panel rounded-2xl">
+                <i data-lucide="search-x" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+                <h3 class="text-base font-semibold text-slate-300">Aucun pattern ne correspond à votre filtre</h3>
+                <p class="text-xs text-slate-500 mt-1">Modifiez vos mots-clés ou réinitialisez les critères.</p>
+                <button @click="resetFilters()" class="mt-4 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 rounded-lg transition">
+                    Réinitialiser les filtres
+                </button>
+            </div>
+
+        </div>
+
+        <!-- VIEW 2: COMPARATOR VIEW -->
+        <div x-show="currentView === 'compare'" class="space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100">Comparateur de Patterns d'Architecture</h2>
+                    <p class="text-xs text-slate-400">Analyse comparative côte à côte pour arbitrage technique et Architecture Decision Record (ADR).</p>
+                </div>
+                <button x-show="selectedForCompare.length > 0" 
+                        @click="selectedForCompare = []" 
+                        class="text-xs text-rose-400 hover:underline">
+                    Vider la sélection
+                </button>
+            </div>
+
+            <div x-show="selectedForCompare.length === 0" class="glass-panel p-12 text-center rounded-2xl">
+                <i data-lucide="columns-2" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+                <p class="text-sm text-slate-300 font-medium">Aucun pattern sélectionné pour la comparaison.</p>
+                <p class="text-xs text-slate-500 mt-1">Parcourez le catalogue et cliquez sur l'icône <i data-lucide="columns-2" class="w-3 h-3 inline"></i> des cartes.</p>
+                <button @click="currentView = 'catalog'" class="mt-4 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-xs text-white rounded-lg transition">
+                    Explorer le catalogue
+                </button>
+            </div>
+
+            <div x-show="selectedForCompare.length > 0" class="overflow-x-auto scrollbar-thin pb-4">
+                <table class="w-full text-left border-collapse min-w-[750px]">
+                    <thead>
+                        <tr class="border-b border-slate-800">
+                            <th class="p-4 bg-slate-900/80 text-xs font-semibold text-slate-400 w-48">Critère</th>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <th class="p-4 bg-slate-900/40 text-sm font-bold text-sky-400 border-l border-slate-800 relative">
+                                    <div class="flex justify-between items-start">
+                                        <span x-text="getPattern(id).name"></span>
+                                        <button @click="toggleCompare(id)" class="text-slate-500 hover:text-rose-400">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </th>
+                            </template>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 text-xs text-slate-300">
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Catégorie</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800" x-text="getCategoryName(getPattern(id).category)"></td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Complexité Implémentation</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800 font-medium" x-text="getPattern(id).complexity"></td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Impact FinOps / Coûts</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800 text-emerald-400 font-semibold" x-text="getPattern(id).finopsImpact"></td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Impact Latence</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800" x-text="getPattern(id).latencyImpact"></td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Problématique Métier</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800 leading-relaxed text-slate-400" x-text="getPattern(id).problem"></td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Gravitee Gateway Role</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800 text-sky-300" x-text="getPattern(id).enterpriseIntegration ? getPattern(id).enterpriseIntegration.gravitee : 'N/A'"></td>
+                            </template>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-slate-400 bg-slate-900/30">Stack Techniques</td>
+                            <template x-for="id in selectedForCompare" :key="id">
+                                <td class="p-4 border-l border-slate-800">
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="tool in getPattern(id).tools" :key="tool">
+                                            <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded text-[10px]" x-text="tool"></span>
+                                        </template>
+                                    </div>
+                                </td>
+                            </template>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 3: FINOPS CALCULATOR -->
+        <div x-show="currentView === 'finops'" class="space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-100">Simulateur d'Économie FinOps LLM Enterprise</h2>
+                <p class="text-xs text-slate-400">Estimez la réduction des coûts d'API LLM grâce aux patterns Semantic Cache, Prompt Compression et LLM Router.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Parameters Form -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4 lg:col-span-1">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4"></i>
+                        Paramètres du Workload
+                    </h3>
+
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">Requêtes LLM par Mois</label>
+                        <input type="number" x-model.number="finopsCalc.monthlyRequests" class="w-full bg-slate-900 border border-slate-700/60 rounded-lg p-2.5 text-sm text-slate-200">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">Tokens Moyen / Requête (In + Out)</label>
+                        <input type="number" x-model.number="finopsCalc.avgTokensPerReq" class="w-full bg-slate-900 border border-slate-700/60 rounded-lg p-2.5 text-sm text-slate-200">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">Modèle LLM Référence (Sans Optimization)</label>
+                        <select x-model="finopsCalc.baseModelCost" class="w-full bg-slate-900 border border-slate-700/60 rounded-lg p-2.5 text-sm text-slate-200">
+                            <option value="0.005">GPT-4o / Claude 3.5 Sonnet (~$5 / 1M tokens)</option>
+                            <option value="0.015">GPT-4 Turbo / Claude Opus (~$15 / 1M tokens)</option>
+                            <option value="0.001">Small LLM SOTA (~$1 / 1M tokens)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800 space-y-3">
+                        <h4 class="text-xs font-semibold text-slate-300">Patterns d'Optimisation Activés :</h4>
+                        
+                        <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" x-model="finopsCalc.enableCache" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500">
+                            <span>Semantic Cache Redis (-30% requêtes)</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" x-model="finopsCalc.enableRouter" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500">
+                            <span>LLM Router / Cascading (60% basculé sur SLM)</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" x-model="finopsCalc.enableCompress" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500">
+                            <span>Prompt Compression LLMLingua (-20% tokens)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Simulation Output -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-2 flex flex-col justify-between space-y-6">
+                    <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider">Résultats de la Simulation FinOps</h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400">Coût Estimé Brut (Sans Patterns)</span>
+                            <div class="text-2xl font-bold text-slate-200 mt-1" x-text="formatCurrency(calculateRawCost())"></div>
+                            <span class="text-[10px] text-slate-500">Facturation API standard</span>
+                        </div>
+
+                        <div class="p-4 bg-emerald-950/40 rounded-xl border border-emerald-800/50">
+                            <span class="text-xs text-emerald-400 font-medium">Coût Optimisé (Avec Patterns)</span>
+                            <div class="text-2xl font-bold text-emerald-400 mt-1" x-text="formatCurrency(calculateOptimizedCost())"></div>
+                            <span class="text-[10px] text-emerald-500/80" x-text="'Économie globale de ' + calculateSavingsPercent() + '% / mois'"></span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Gain Annuel Reévolué:</span>
+                            <span class="font-bold text-emerald-400" x-text="formatCurrency((calculateRawCost() - calculateOptimizedCost()) * 12)"></span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full transition-all duration-500" :style="'width: ' + calculateSavingsPercent() + '%'"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-sky-950/30 rounded-xl border border-sky-800/40 text-xs text-sky-200/90 leading-relaxed">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-1 text-sky-400"></i>
+                        <strong>Recommandation Architecte :</strong> La combinaison de Gravitee API Gateway (pour le cache Redis en amont) avec un service Spring Boot orchestrateur réactif WebFlux permet de réduire la facture API LLM de plus de 60% en production.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: GLOSSAIRE & VULGARISATION -->
+        <div x-show="currentView === 'glossary'" class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <i data-lucide="book-marked" class="w-6 h-6 text-purple-400"></i>
+                        Glossaire & Vulgarisation des Concepts IA
+                    </h2>
+                    <p class="text-xs text-slate-400">Dictionnaire d'architecture pour aligner les équipes techniques, Produit et Métier sur la terminologie IA Gen, Observabilité & FinOps.</p>
+                </div>
+                <!-- Glossary Search -->
+                <div class="relative w-full md:w-80">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" 
+                           x-model="glossarySearch" 
+                           placeholder="Chercher un terme (ex: Embedding, RAG Triad, TTFT, Guardrails)..." 
+                           class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700/70 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs">
+                </div>
+            </div>
+
+            <!-- Glossary Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <template x-for="item in filteredGlossary" :key="item.term">
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800/90 space-y-3 hover:border-purple-500/40 transition">
+                        <div class="flex items-start justify-between gap-2">
+                            <h3 class="text-base font-bold text-slate-100" x-text="item.term"></h3>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-800/40" x-text="item.category"></span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed" x-text="item.definition"></p>
+                        <div class="pt-2 border-t border-slate-800/80">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Impact Architecte :</span>
+                            <p class="text-xs text-slate-400 italic" x-text="item.architectContext"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State Glossary -->
+            <div x-show="filteredGlossary.length === 0" class="text-center py-12 glass-panel rounded-2xl">
+                <i data-lucide="book-open-check" class="w-10 h-10 text-slate-600 mx-auto mb-2"></i>
+                <p class="text-xs text-slate-400">Aucun terme trouvé pour votre recherche.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PATTERN DETAIL MODAL -->
+    <div x-show="isModalOpen" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto glass-panel bg-slate-950/80 flex items-center justify-center p-4">
+        
+        <div @click.away="closeModal()" 
+             class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-8 space-y-6 scrollbar-thin">
+            
+            <template x-if="activePattern">
+                <div>
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-start border-b border-slate-800 pb-4">
+                        <div>
+                            <span class="px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider"
+                                  :class="getCategoryBadgeClass(activePattern.category)"
+                                  x-text="getCategoryName(activePattern.category)">
+                            </span>
+                            <h2 class="text-2xl font-bold text-white mt-2" x-text="activePattern.name"></h2>
+                        </div>
+                        <button @click="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body Grid -->
+                    <div class="space-y-6 mt-6">
+
+                        <!-- Context & Problem -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i> Problématique Métier
+                                </h4>
+                                <p class="text-xs text-slate-300 leading-relaxed" x-text="activePattern.problem"></p>
+                            </div>
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Solution d'Architecture
+                                </h4>
+                                <p class="text-xs text-slate-300 leading-relaxed" x-text="activePattern.solution"></p>
+                            </div>
+                        </div>
+
+                        <!-- Architecture Flow Diagram -->
+                        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
+                            <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="git-fork" class="w-4 h-4"></i> Flux Architectural (Sequence Flow)
+                            </h4>
+                            <div class="font-mono text-xs text-slate-300 bg-slate-900/90 p-4 rounded-lg overflow-x-auto whitespace-pre border border-slate-800 text-sky-200/90" 
+                                 x-text="activePattern.architectureDiagram"></div>
+                        </div>
+
+                        <!-- FinOps & Observability Metrics -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-emerald-950/20 p-4 rounded-xl border border-emerald-800/40">
+                                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4"></i> Impact & Métriques FinOps
+                                </h4>
+                                <p class="text-xs text-slate-300 leading-relaxed" x-text="activePattern.finopsDetails"></p>
+                            </div>
+
+                            <div class="bg-purple-950/20 p-4 rounded-xl border border-purple-800/40">
+                                <h4 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <i data-lucide="activity" class="w-4 h-4"></i> Métriques d'Observabilité Ciblées
+                                </h4>
+                                <ul class="list-disc list-inside text-xs text-slate-300 space-y-1">
+                                    <template x-for="metric in activePattern.observabilityMetrics" :key="metric">
+                                        <li x-text="metric"></li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- ENTERPRISE TECHNICAL IMPLEMENTATION (GRAVITEE, KAFKA, SPRING BOOT) -->
+                        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800/90 space-y-3">
+                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                                <i data-lucide="server" class="w-4 h-4"></i>
+                                Implémentation Entreprise (Gravitee Gateway, Apache Kafka, Spring Boot Java)
+                            </h4>
+                            <template x-if="activePattern.enterpriseIntegration">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                                    <!-- Gravitee -->
+                                    <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+                                        <div class="text-[11px] font-bold text-sky-400 mb-1 flex items-center gap-1">
+                                            <i data-lucide="shield" class="w-3.5 h-3.5"></i> Gravitee API Gateway
+                                        </div>
+                                        <p class="text-[11px] text-slate-300 leading-relaxed" x-text="activePattern.enterpriseIntegration.gravitee"></p>
+                                    </div>
+                                    <!-- Kafka -->
+                                    <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+                                        <div class="text-[11px] font-bold text-amber-400 mb-1 flex items-center gap-1">
+                                            <i data-lucide="workflow" class="w-3.5 h-3.5"></i> Apache Kafka Stream
+                                        </div>
+                                        <p class="text-[11px] text-slate-300 leading-relaxed" x-text="activePattern.enterpriseIntegration.kafka"></p>
+                                    </div>
+                                    <!-- Spring Boot -->
+                                    <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+                                        <div class="text-[11px] font-bold text-emerald-400 mb-1 flex items-center gap-1">
+                                            <i data-lucide="code-2" class="w-3.5 h-3.5"></i> Spring Boot 3 & Spring AI
+                                        </div>
+                                        <p class="text-[11px] text-slate-300 leading-relaxed" x-text="activePattern.enterpriseIntegration.springBoot"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Tech Stack & Tools -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Outillage & Écosystème Recommandé</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="tool in activePattern.tools" :key="tool">
+                                    <span class="px-3 py-1 bg-slate-800 border border-slate-700 text-sky-300 text-xs font-medium rounded-lg" x-text="tool"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Export Action -->
+                        <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
+                            <button @click="copyMarkdownADR(activePattern)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 rounded-lg transition flex items-center gap-1.5">
+                                <i data-lucide="copy" class="w-4 h-4"></i> Copier la fiche ADR (Markdown)
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        function patternCatalog() {
+            return {
+                currentView: 'catalog',
+                searchQuery: '',
+                selectedCategory: 'ALL',
+                filterComplexity: '',
+                filterFinops: '',
+                selectedForCompare: [],
+                isModalOpen: false,
+                activePattern: null,
+                glossarySearch: '',
+
+                // FinOps Simulator state
+                finopsCalc: {
+                    monthlyRequests: 500000,
+                    avgTokensPerReq: 2000,
+                    baseModelCost: 0.005,
+                    enableCache: true,
+                    enableRouter: true,
+                    enableCompress: false
+                },
+
+                categories: [
+                    { id: 'rag', name: 'RAG & Knowledge', activeBg: 'bg-blue-600', dotColor: 'bg-blue-400' },
+                    { id: 'eval', name: 'LLM-as-a-Judge & Eval', activeBg: 'bg-amber-600', dotColor: 'bg-amber-400' },
+                    { id: 'obs', name: 'Observabilité & Tracing', activeBg: 'bg-purple-600', dotColor: 'bg-purple-400' },
+                    { id: 'finops', name: 'FinOps & Optimization', activeBg: 'bg-emerald-600', dotColor: 'bg-emerald-400' },
+                    { id: 'agents', name: 'Orchestration & Agents', activeBg: 'bg-pink-600', dotColor: 'bg-pink-400' },
+                    { id: 'specialization', name: 'Fine-Tuning & Distillation', activeBg: 'bg-indigo-600', dotColor: 'bg-indigo-400' },
+                    { id: 'security', name: 'Sécurité & Anonymisation PII', activeBg: 'bg-red-600', dotColor: 'bg-red-400' }
+                ],
+
+                glossaryTerms: [
+                    {
+                        term: 'Anonymisation / Tokenisation PII',
+                        category: 'Sécurité & Données Sensibles',
+                        definition: 'Substitution des Données à Caractère Personnel (PII: Noms, NIR, IBAN) par des jetons aléatoires inversibles (Vault) ou irréversibles.',
+                        architectContext: 'Garantit la conformité RGPD avant toute transmission de documents vers un LLM externe ou Cloud.'
+                    },
+                    {
+                        term: 'Vector Embedding',
+                        category: 'RAG & Recherche Vectorielle',
+                        definition: 'Représentation mathématique d’un texte sous forme d’un vecteur numérique dense (ex: 1536 dimensions) capturant la sémantique.',
+                        architectContext: 'Permet la recherche par proximité d’idée (distance Cosine) plutôt que par mot-clé exact.'
+                    },
+                    {
+                        term: 'Semantic Caching',
+                        category: 'FinOps & Latence',
+                        definition: 'Mise en cache des réponses LLM basée sur la proximité vectorielle (distance Cosine) des questions plutôt qu’un hachage exact.',
+                        architectContext: 'Permet des gains de coût de 20% à 45% et une latence quasi-nulle (~10ms) sur les requêtes redondantes.'
+                    },
+                    {
+                        term: 'LLM Router / Model Cascading',
+                        category: 'FinOps & Orchestration',
+                        definition: 'Mécanisme d’aiguillage dynamique qui dirige les requêtes simples vers un petit modèle (SLM) et les requêtes complexes vers un LLM SOTA.',
+                        architectContext: 'Réduit drastiquement le coût moyen par requête tout en maintenant la qualité sur les cas complexes.'
+                    },
+                    {
+                        term: 'GraphRAG (Knowledge Graph)',
+                        category: 'RAG & Recherche Vectorielle',
+                        definition: 'Combinaison de bases de données vectorielles et de graphes de connaissances (Neo4j) pour capturer les relations entre entités.',
+                        architectContext: 'Essentiel pour répondre à des questions complexes sur des documents entrelacés ou structurés en réseau.'
+                    },
+                    {
+                        term: 'RAG Triad (Faithfulness, Relevance, Context)',
+                        category: 'Évaluation & Qualité',
+                        definition: 'Ensemble de 3 métriques fondamentales (Fidélité au contexte, Pertinence réponse, Pertinence contexte) pour évaluer un RAG.',
+                        architectContext: 'Incontournable pour valider l’absence d’hallucinations et l’exactitude de la recherche documentaire.'
+                    },
+                    {
+                        term: 'TTFT (Time To First Token)',
+                        category: 'Observabilité & Performance',
+                        definition: 'Temps écoulé entre l’envoi de la requête au serveur et la réception du tout premier token généré par le LLM.',
+                        architectContext: 'Métrique d’expérience utilisateur critique pour les interfaces de conversation en streaming.'
+                    },
+                    {
+                        term: 'LoRA (Low-Rank Adaptation)',
+                        category: 'Fine-Tuning & Spécialisation',
+                        definition: 'Technique d’adaptation de modèles qui gèle le modèle de base et ajoute des matrices légères réentraînées.',
+                        architectContext: 'Permet d’adapter un LLM pour un domaine métier spécifique avec 99% de paramètres en moins à entraîner.'
+                    },
+                    {
+                        term: 'Speculative Decoding',
+                        category: 'Performance & Inférence',
+                        definition: 'Un petit modèle rapide (Draft) génère plusieurs tokens candidats validés en parallèle par le grand modèle (Target).',
+                        architectContext: 'Accélère la génération textuelle de 2x à 3x sans aucune détérioration de la qualité du modèle cible.'
+                    },
+                    {
+                        term: 'Guardrails (Input/Output Safety)',
+                        category: 'Sécurité & Contrôle',
+                        definition: 'Couche de validation en amont et en aval pour bloquer le jailbreak, la désinformation et garantir le format JSON.',
+                        architectContext: 'Protection indispensable pour tout système exposant un LLM directement à des utilisateurs externes.'
+                    },
+                    {
+                        term: 'LangChain4j / Spring AI',
+                        category: 'Frameworks Java Enterprise',
+                        definition: 'Projets fondateurs pour intégrer l’IA Générative de manière native dans les microservices Java / Spring Boot 3.',
+                        architectContext: 'Offre des abstractions type ChatModel, VectorStore et RAG Pipelines prêtes pour le monde entreprise.'
+                    }
+                ],
+
+                patterns: [
+                    // --- CATEGORY: SECURITY & PII ---
+                    {
+                        id: 'pii-anonymization-pipeline',
+                        name: 'Async PII Scrubbing & Vaulting Pipeline',
+                        category: 'security',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Modéré (Async Pipeline)',
+                        shortDesc: 'Pipeline d’anonymisation et ré-identification contrôlée des documents sensibles via Coffre-fort de Tokens avant envoi LLM.',
+                        problem: 'Traitement de documents juridiques, RH ou bancaires contenant des données PII (NIF, NIR, IBAN, Noms) ne devant jamais quitter le réseau souverain.',
+                        solution: 'Extraction de texte, détection NER des entités sensibles (Presidio/Local), remplacement par des UUIDs enregistrés dans un Vault, ré-injection des vraies données côté client.',
+                        architectureDiagram: `Doc Ingestion ──► Spring Boot Microservice ──► Kafka [topic: doc-raw]
+   ──► Presidio / Local PII Redactor ──► Vault (Tokens Mapping)
+   ──► Kafka [topic: doc-clean] ──► LLM API Processing ──► Spring Boot Client Re-hydration`,
+                        finopsDetails: 'Évite les sanctions RGPD massives et réduit la taille du contexte en remplaçant les entités complexes par des tokens courts.',
+                        observabilityMetrics: ['PII Masking Precision (%)', 'Vault Lookup Latency (ms)', 'Unmasked Leakage Alert Rate'],
+                        tools: ['Microsoft Presidio', 'HashiCorp Vault', 'Spring Boot 3', 'Kafka', 'LangChain4j'],
+                        enterpriseIntegration: {
+                            gravitee: 'Policy de filtrage et contrôle regex sur headers/payload HTTP pour bloquer toute fuite de NIR/IBAN non anonymisé.',
+                            kafka: 'Microservice Redactor à l’écoute du topic `raw-documents-v1`. Publication des documents nettoyés sur `sanitized-documents-v1`.',
+                            springBoot: 'Application Spring Boot 3 avec `@KafkaListener`. SDK Presidio Java ou sidecar REST avec Spring AI ChatModel.'
+                        }
+                    },
+                    {
+                        id: 'confidential-vault-rag',
+                        name: 'Confidential Document RAG with Vault Pseudonymization',
+                        category: 'security',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Faible (+15ms)',
+                        shortDesc: 'Indexation de documents dans la Vector DB sous forme pseudonymisée avec résolution d’accès basée sur les rôles (RBAC).',
+                        problem: 'Les collaborateurs ne doivent avoir accès via le RAG qu’aux fragments de documents correspondant à leurs habilitations strictes.',
+                        solution: 'Masquage systématique à l’indexation vectorielle. Injection d’un filtre Metadata RBAC lors de la recherche vectorielle (Vector Store Metadata Filtering).',
+                        architectureDiagram: `Doc Input ──► Anonymizer Service ──► Vector DB (Embeddings des morceaux anonymisés + ACL Metadata)
+User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Metadata Filter [user_role == doc_acl]`,
+                        finopsDetails: 'Mutualise une seule base vectorielle multi-tenant sécurisée plutôt qu’un cluster par niveau de confidentialité.',
+                        observabilityMetrics: ['ACL Access Violations', 'Vector Filter Overhead', 'Redaction Precision'],
+                        tools: ['Spring AI Vector Store', 'Pgvector', 'Gravitee OAuth2/JWT', 'LangChain4j'],
+                        enterpriseIntegration: {
+                            gravitee: 'Validation du token JWT OAuth2, extraction des scopes utilisateur et injection du header `X-User-Permissions`.',
+                            kafka: 'Event sourcing sur Kafka pour synchroniser en temps réel la table des droits et invalider les vecteurs révoqués.',
+                            springBoot: 'Spring Boot avec Spring AI `VectorStore` et filtre dynamique `.withFilterExpression()` selon les scopes transmis par Gravitee.'
+                        }
+                    },
+                    {
+                        id: 'air-gapped-slm-scrubbing',
+                        name: 'On-Prem / Air-Gapped SLM Privacy Gatekeeper',
+                        category: 'security',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Very High',
+                        latencyImpact: 'Trés Faible',
+                        shortDesc: 'Utilise un petit modèle de langue (SLM 3B-8B) hébergé 100% On-Premise pour filtrer et nettoyer les prompts avant tout appel LLM externe.',
+                        problem: 'Les règles Regex classiques ne capturent pas les secrets métier, le code source propriétaire ou la sémantique de documents secrets.',
+                        solution: 'Déploiement d’un SLM On-Premise spécialisé (ex: Llama-3-8B ou Mistral-7B) dédié au contrôle et à la réécriture sécurisée du prompt.',
+                        architectureDiagram: `User Prompt ──► Gravitee Gateway ──► On-Prem SLM Gatekeeper (Local vLLM)
+   ├─► [Contains Secrets] ──► Refuse / Mask On-Premise
+   └─► [Sanitized Prompt] ──► External Cloud LLM (GPT-4o / Claude)`,
+                        finopsDetails: 'Évite les fuites de propriété intellectuelle tout en tirant parti du faible coût d’exécution du SLM en local.',
+                        observabilityMetrics: ['On-Prem SLM TTFT', 'Secret Leaks Intercepted', 'LLM Fallback Rate'],
+                        tools: ['vLLM Local', 'Mistral-7B', 'Spring Boot WebFlux', 'Gravitee Gateway'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gravitee HTTP Callout Policy interrogeant l’endpoint du SLM local On-Premise avant de router vers l’API Cloud.',
+                            kafka: 'Audit streaming async : chaque décision du Gatekeeper est publiée sur Kafka `ai-security-audit-log` pour Splunk / Elastic.',
+                            springBoot: 'Application Spring Boot WebFlux réactive orchestrant l’appel local vLLM puis le modèle distant.'
+                        }
+                    },
+
+                    // --- CATEGORY: RAG & KNOWLEDGE ---
+                    {
+                        id: 'naive-rag',
+                        name: 'Baseline / Naive RAG Pattern',
+                        category: 'rag',
+                        complexity: 'Faible',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Faible (~300ms)',
+                        shortDesc: 'Découpage documentaire basique, vectorisation, recherche des K plus proches voisins et injection dans le prompt LLM.',
+                        problem: 'Le LLM ne connaît pas les données privées de l’entreprise et produit des réponses obsolètes ou approximatives.',
+                        solution: 'Pipeline standard Ingestion -> Chunking (500 tokens) -> Vector DB -> Top-K Retrieval -> Injection Contextuelle.',
+                        architectureDiagram: `Query ──► Embedding Model ──► Vector Store Search (Top-K)
+   ──► Inject Context in Prompt ──► LLM Call ──► Final Answer`,
+                        finopsDetails: 'Coût modéré mais risque de surcharge de tokens si le découpage est trop large.',
+                        observabilityMetrics: ['Retrieval Latency', 'Vector Hit Score', 'Token Context Size'],
+                        tools: ['Spring AI Vector Store', 'Pgvector', 'LangChain4j', 'OpenAI Embeddings'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gravitee API Gateway gérant l’authentification OAuth2 et la limitation de débit (Rate Limiting).',
+                            kafka: 'Kafka Ingestion Pipeline consommant les nouveaux fichiers PDF sur le topic `document-ingestion-v1`.',
+                            springBoot: 'Service Spring Boot 3 utilisant Spring AI `PgVectorStore` et `ChatClient`.'
+                        }
+                    },
+                    {
+                        id: 'advanced-rag',
+                        name: 'Advanced RAG (Hybrid Search & Re-ranking)',
+                        category: 'rag',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Modéré (+100ms)',
+                        shortDesc: 'Combinaison de la recherche vectorielle et de la recherche textuelle BM25, réordonnée par un modèle Cross-Encoder.',
+                        problem: 'La recherche vectorielle pure échoue sur les références exactes (codes produits, numéros de dossier, acronymes métier).',
+                        solution: 'Recherche hybride (Dense Vector + Sparse BM25) combinée via Reciprocal Rank Fusion (RRF) et filtrée par un Re-ranker (Cohere/BGE).',
+                        architectureDiagram: `Query ──► Hybrid Search (Vector Pgvector + BM25 Elasticsearch)
+   ──► Merge Results ──► Cross-Encoder Re-Ranker (Cohere) ──► Top 3 Chunks ──► LLM`,
+                        finopsDetails: 'Réduit de 50% le nombre de tokens envoyés au LLM en sélectionnant uniquement les 3 morceaux ultra-pertinents.',
+                        observabilityMetrics: ['Re-ranker Score Delta', 'Hybrid Search Precision', 'LLM Token Savings'],
+                        tools: ['Elasticsearch', 'Pgvector', 'Cohere Rerank', 'Spring AI', 'LangChain4j'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gravitee transférant les requêtes de recherche vers le microservice de RERANK.',
+                            kafka: 'Event Streaming Kafka pour re-indexer en parallèle dans Elasticsearch et Pgvector.',
+                            springBoot: 'Microservice Spring Boot exécutant les requêtes hybrides asynchrones via CompletableFuture Java.'
+                        }
+                    },
+                    {
+                        id: 'graph-rag',
+                        name: 'GraphRAG (Knowledge Graph Augmented Generation)',
+                        category: 'rag',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Moyen (~800ms)',
+                        shortDesc: 'Extraction des entités et relations sous forme de graphe de connaissances pour répondre aux questions complexes multi-documents.',
+                        problem: 'Les RAG classiques n’arrivent pas à faire de synthèses globales ("Quels sont les liens entre la filiale X et les contrats Y ?").',
+                        solution: 'Construction d’un Knowledge Graph (Neo4j) couplé à la recherche vectorielle. Traversée de graphe lors de la requête.',
+                        architectureDiagram: `Query ──► Vector Retrieval + Graph Subgraph Extraction (Neo4j Cypher)
+   ──► Synthesize Entity Relationships ──► Structured Prompt ──► LLM Answer`,
+                        finopsDetails: 'Coût d’indexation initial élevé mais grande précision sur les analyses d’impact complexes.',
+                        observabilityMetrics: ['Graph Subgraph Size', 'Cypher Query Execution Time', 'Context Completeness Score'],
+                        tools: ['Neo4j', 'LangChain4j GraphRAG', 'Spring Data Neo4j', 'LlamaIndex'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gateway interceptant les appels d’analyse de risques et appliquant des politiques d’autorisation renforcées.',
+                            kafka: 'Consommation des événements métier Kafka pour mettre à jour les nœuds et relations dans Neo4j.',
+                            springBoot: 'Spring Boot 3 avec `Spring Data Neo4j` pour les requêtes Cypher dynamiques et Spring AI pour la synthèse.'
+                        }
+                    },
+                    {
+                        id: 'corrective-rag',
+                        name: 'Corrective RAG (CRAG)',
+                        category: 'rag',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Variable (selon Fallback)',
+                        shortDesc: 'Un évaluateur léger vérifie la qualité des documents extraits et bascule automatiquement sur une recherche Web en cas d’insuffisance.',
+                        problem: 'Si la base de connaissances ne contient pas la réponse, le RAG classique force le LLM à halluciner sur un mauvais contexte.',
+                        solution: 'Un module d’évaluation attribue un score au contexte extrait. Si Score < Seuil, déclenchement automatique d’une API Web (Tavily/Serper) ou de la base secondaire.',
+                        architectureDiagram: `Query ──► Retrieval ──► Context Evaluator 
+   ├─► [Correct]   ──► Standard RAG LLM
+   ├─► [Ambiguous] ──► Query Transformation + Web Search Fallback
+   └─► [Incorrect] ──► Web Search Only ──► LLM Answer`,
+                        finopsDetails: 'Évite les appels coûteux au grand LLM quand le contexte extrait est inutilisable.',
+                        observabilityMetrics: ['Retrieval Accuracy Grade', 'Fallback Trigger Rate', 'Hallucination Prevention Score'],
+                        tools: ['Tavily Search API', 'LangChain4j', 'Spring AI', 'Resilience4j'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gestion des clés d’API externes (Tavily/Serper) et sécurisation du trafic sortant via Egress Policy.',
+                            kafka: 'Emission d’un événement Kafka `rag-context-miss` pour notifier les équipes Document Management de combler la lacune.',
+                            springBoot: 'Pattern Spring Boot avec Resilience4j `@CircuitBreaker` pour basculer sur le Fallback Web Search.'
+                        }
+                    },
+                    {
+                        id: 'self-reflective-rag',
+                        name: 'Self-Reflective RAG (Self-RAG)',
+                        category: 'rag',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Élevé (Iterative Loop)',
+                        shortDesc: 'Le LLM évalue lui-même par jetons de réflexion l’utilité du contexte, la fidélité de sa réponse et sa pertinence.',
+                        problem: 'Nécessite une autorégulation avancée pour garantir une fiabilité à 100% sur des processus bancaires ou légaux critiques.',
+                        solution: 'Entraînement/Prompting du LLM pour émettre des jetons de contrôle (`[IsRel]`, `[IsSup]`, `[IsUse]`) et auto-corriger ses réponses.',
+                        architectureDiagram: `Query ──► Parallel Retrieval ──► Segment LLM Generation + Self-Critic Tokens [IsRel, IsSup]
+   ──► Filter Unsupported Segments ──► Final Cleaned Answer`,
+                        finopsDetails: 'Incurre des coûts de tokens supplémentaires par requête, réservé aux cas d’usage à très haute valeur ajoutée.',
+                        observabilityMetrics: ['Reflection Token Ratio', 'Self-Correction Rate', 'Faithfulness Score'],
+                        tools: ['Self-RAG Fine-tuned SLM', 'LangGraph Java', 'Spring Boot WebFlux'],
+                        enterpriseIntegration: {
+                            gravitee: 'Augmentation du délai de Timeout API sur la Gateway pour autoriser la boucle d’auto-correction.',
+                            kafka: 'Audit streaming des tokens de réflexion `[IsSup]` pour surveiller la qualité globale du système.',
+                            springBoot: 'State Machine réactive Spring Boot orchestrant la boucle de self-critique via Spring AI.'
+                        }
+                    },
+                    {
+                        id: 'agentic-rag',
+                        name: 'Agentic RAG Pattern',
+                        category: 'rag',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Élevé (~1.5s)',
+                        shortDesc: 'Un agent autonome décompose une question complexe, interroge plusieurs bases et reformule la question autant de fois que nécessaire.',
+                        problem: 'Les questions des utilisateurs métiers nécessitent souvent d’assembler des données venant de 3 ou 4 bases applicatives différentes.',
+                        solution: 'Agent autonome doté d’outils (Vector Store 1, Vector Store 2, SQL DB) effectuant une boucle ReAct pour rassembler le savoir.',
+                        architectureDiagram: `User Question ──► Agent Orchestrator (Plan) 
+   ──► Query Decomposition ──► Multi-Tool Retrieval (Vector DB, SQL, Internal API) ──► Re-Plan ──► Final Synthesis`,
+                        finopsDetails: 'Requiert des barrières (Max Iterations = 3) pour éviter l’explosion des coûts de requêtes récursives.',
+                        observabilityMetrics: ['Agent Iteration Count', 'Tool Usage Distribution', 'Cost Per Agent Session'],
+                        tools: ['LangChain4j Agents', 'Spring AI Function Calling', 'LangGraph'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gravitee exposant les outils internes sous forme d’OpenAPI sécurisées consommables par l’Agent.',
+                            kafka: 'Enregistrement de chaque étape intermédiaire d’agent dans Kafka `agent-execution-trace`.',
+                            springBoot: 'Spring Boot 3 tirant parti des `@Bean` de Function Calling Spring AI (`@Description`).'
+                        }
+                    },
+
+                    // --- CATEGORY: EVALUATION & QUALITY ---
+                    {
+                        id: 'llm-as-a-judge',
+                        name: 'LLM-as-a-Judge (Pairwise & Rubric Evaluation)',
+                        category: 'eval',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Async Batch Process',
+                        shortDesc: 'Utilise un modèle LLM de référence (GPT-4o/Claude Opus) pour évaluer automatiquement et à grande échelle la qualité des réponses.',
+                        problem: 'L’évaluation humaine des réponses de chatbots est trop lente, chère et impossible à généraliser sur des millions de requêtes.',
+                        solution: 'Un prompt d’évaluation strict avec une grille de notation (Rubric) ou comparaison A/B (Pairwise) attribue une note de 1 à 5 avec justification.',
+                        architectureDiagram: `Production Log (Prompt + Answer) ──► Kafka [topic: llm-audit]
+   ──► Evaluator Worker ──► Call Judge Model (GPT-4o with Rubric) ──► Store Score in DB`,
+                        finopsDetails: 'Permet de tester des modèles légers (SLMs) en production et d’évaluer la perte de qualité en temps réel.',
+                        observabilityMetrics: ['Judge Agreement Rate (Human vs Judge)', 'Average Quality Score (1-5)', 'Hallucination Rate'],
+                        tools: ['LangSmith', 'DeepEval', 'Ragas', 'Spring Boot Scheduled Batch'],
+                        enterpriseIntegration: {
+                            gravitee: 'Envoi d’une copie asynchrone du request/response body vers un endpoint de collecte d’évaluation.',
+                            kafka: 'Microservices d’évaluation consommateurs du topic Kafka `llm-audit-events`.',
+                            springBoot: 'Spring Batch Boot Java traitant la notation par lots de nuit pour minimiser l’impact sur les API Keys.'
+                        }
+                    },
+                    {
+                        id: 'input-output-guardrails',
+                        name: 'Input / Output Guardrails Pattern',
+                        category: 'eval',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Très Faible (+30ms)',
+                        shortDesc: 'Filtres de sécurité légers placés en amont et en aval du LLM pour bloquer les jailbreaks, la désinformation et garantir la conformité.',
+                        problem: 'Risques d’attaques par injection de prompt (Jailbreak), de fuite de données confidentielles ou de génération de contenu hors-charte.',
+                        solution: 'Double barrière : Guardrail d’entrée (NeMo Guardrails/Llama Guard) et Guardrail de sortie (JSON Schema validator, Toxic text detector).',
+                        architectureDiagram: `User Prompt ──► Input Guardrail (Jailbreak Check) ──► LLM Call
+   ──► Output Guardrail (Schema & Toxicity Check) ──► Final User Response`,
+                        finopsDetails: 'Bloque les attaques en amont sans consommer de tokens sur le LLM principal.',
+                        observabilityMetrics: ['Blocked Attack Count', 'Guardrail Latency Overhead', 'Schema Validation Failure Rate'],
+                        tools: ['NeMo Guardrails', 'Llama Guard', 'Guardrails AI', 'Spring Boot Bean Validation'],
+                        enterpriseIntegration: {
+                            gravitee: 'Custom Gravitee Policy interceptant les attaques de type Prompt Injection connues.',
+                            kafka: 'Publication immédiate des alertes de sécurité sur le topic Kafka `security-jailbreak-attempts`.',
+                            springBoot: 'Validateur Spring Boot `@ControllerAdvice` vérifiant la conformité du JSON renvoyé par Spring AI.'
+                        }
+                    },
+                    {
+                        id: 'rag-triad-evaluator',
+                        name: 'RAG Triad Evaluator Pattern',
+                        category: 'eval',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Async Evaluation',
+                        shortDesc: 'Mesure automatique continue des 3 métriques clés du RAG : Context Relevance, Groundedness (Faithfulness) et Answer Relevance.',
+                        problem: 'Impossible de savoir si une mauvaise réponse provient d’une mauvaise recherche vectorielle ou d’une hallucination du LLM.',
+                        solution: 'Décomposition du scoring en 3 sous-évaluations indépendantes pour cibler exactement le composant RAG défaillant.',
+                        architectureDiagram: `[Query + Context + Answer] 
+   ├──► Evaluate Context Relevance (Vector Search Quality)
+   ├──► Evaluate Faithfulness (LLM Hallucination Level)
+   └──► Evaluate Answer Relevance (User Satisfaction)`,
+                        finopsDetails: 'Identifie directement si vous payez trop cher un Vector Store mal configuré.',
+                        observabilityMetrics: ['Context Relevance Score', 'Faithfulness Score', 'Answer Relevance Score'],
+                        tools: ['TruLens', 'Ragas', 'Phoenix Arize', 'Spring AI Metrics'],
+                        enterpriseIntegration: {
+                            gravitee: 'Capture des métriques pour alimenter les dashboards de gouvernance API.',
+                            kafka: 'Streaming des métriques RAG Triad vers Apache Kafka pour analyse Grafana / Prometheus.',
+                            springBoot: 'Spring Boot Micrometer custom metrics exportant les scores RAG Triad.'
+                        }
+                    },
+
+                    // --- CATEGORY: OBSERVABILITY ---
+                    {
+                        id: 'distributed-tracing-llm',
+                        name: 'Distributed Tracing & LLM Telemetry Pattern',
+                        category: 'obs',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Négligeable (<2ms)',
+                        shortDesc: 'Propagation d’un Trace ID unique (OpenTelemetry) à travers l’API Gateway, les microservices Spring Boot et les appels LLM.',
+                        problem: 'Impossibilité de diagnostiquer les lenteurs dans des architectures réparties complexes mêlant microservices, Kafka et LLMs.',
+                        solution: 'Instrumentation OpenTelemetry / OpenInference capturant les spans de chaque appel, du prompt et des tokens générés.',
+                        architectureDiagram: `Client ──► Gravitee [Trace Parent ID] ──► Spring Boot ──► Kafka
+   ──► OpenTelemetry Collector ──► Jaeger / Dynatrace / Datadog`,
+                        finopsDetails: 'Donne une visibilité exacte du coût de chaque transaction utilisateur bout en bout.',
+                        observabilityMetrics: ['Time To First Token (TTFT)', 'Token Generation Speed (tok/s)', 'End-to-End Latency'],
+                        tools: ['OpenTelemetry', 'OpenInference', 'Jaeger', 'Datadog', 'Spring Cloud Sleuth/Micrometer'],
+                        enterpriseIntegration: {
+                            gravitee: 'Injection et propagation des W3C Trace Context Headers (`traceparent`).',
+                            kafka: 'Propagation des entêtes OpenTelemetry dans les Kafka Record Headers.',
+                            springBoot: 'Spring Boot 3 `Micrometer Tracing` couplé au SDK OpenInference pour LangChain4j.'
+                        }
+                    },
+                    {
+                        id: 'drift-hallucination-telemetry',
+                        name: 'Drift & Hallucination Telemetry Monitoring',
+                        category: 'obs',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Async Monitor',
+                        shortDesc: 'Supervision en temps réel de la dérive sémantique (Embedding Drift) et de l’entropie des réponses en production.',
+                        problem: 'Les LLMs Cloud évoluent silencieusement et la qualité de la base de connaissances se dégrade avec le temps (Drift).',
+                        solution: 'Calcul quotidien de la distribution des embeddings des requêtes et détection statistique des anomalies de réponse.',
+                        architectureDiagram: `Live Traffic Vector Embeddings ──► Stream Analytics (Kafka Streams)
+   ──► Drift Calculator ──► Alert Manager (Prometheus / Grafana)`,
+                        finopsDetails: 'Prévient la perte de clients due à une dégradation invisible de la qualité des réponses.',
+                        observabilityMetrics: ['Embedding Distribution Shift (Wasserstein Distance)', 'Perplexity Drift', 'User Negative Feedback Rate'],
+                        tools: ['Evidently AI', 'Kafka Streams', 'Prometheus', 'Grafana'],
+                        enterpriseIntegration: {
+                            gravitee: 'Exportateur de métriques API pour la détection précoce d’anomalies de trafic.',
+                            kafka: 'Kafka Streams compute job calculant la dérive sémantique sur des fenêtres glissantes de 24h.',
+                            springBoot: 'Microservice Spring Boot Actuator exposant des endpoints Prometheus sur la dérive.'
+                        }
+                    },
+
+                    // --- CATEGORY: FINOPS & OPTIMIZATION ---
+                    {
+                        id: 'semantic-cache',
+                        name: 'Semantic Caching Pattern',
+                        category: 'finops',
+                        complexity: 'Faible',
+                        finopsImpact: 'Very High',
+                        latencyImpact: 'Très Faible (~10ms)',
+                        shortDesc: 'Intercepte les requêtes LLM sémantiquement similaires via embeddings pour retourner une réponse cachée sans appel API.',
+                        problem: 'Les utilisateurs posent fréquemment des questions identiques ou synonymes. Interroger le LLM à chaque fois génère des coûts répétitifs.',
+                        solution: 'Calcul du Vector Embedding de la requête. Recherche de similarité Cosine dans une DB In-Memory (Redis). Si score > 0.92, retour direct.',
+                        architectureDiagram: `User Query --> Vector Embedding --> Vector Cache Lookup (Redis)
+   ├─► [CACHE HIT  (Sim >= 0.92)] ──► Return Cached Answer (10ms, $0)
+   └─► [CACHE MISS (Sim < 0.92)]  ──► LLM API Call ──► Store Answer in Cache`,
+                        finopsDetails: 'Réduction directe de 20% à 45% de la facture LLM selon la redondance des requêtes.',
+                        observabilityMetrics: ['Cache Hit Ratio (%)', 'Embedding Latency (ms)', 'Token Cost Saved ($)'],
+                        tools: ['Redis VL', 'GPTCache', 'LiteLLM Cache', 'Spring Cache'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gravitee Custom Cache Policy effectuant la recherche vectorielle Redis en amont du routing backend.',
+                            kafka: 'Publication d’événements d’invalidation de cache sur le topic Kafka `cache-eviction-events`.',
+                            springBoot: 'Spring Boot avec `@Cacheable` étendu ou `RedisTemplate` Java supportant RediSearch / LangChain4j Cache.'
+                        }
+                    },
+                    {
+                        id: 'llm-router',
+                        name: 'LLM Router / Model Cascading',
+                        category: 'finops',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'Very High',
+                        latencyImpact: 'Amélioré',
+                        shortDesc: 'Achemine dynamiquement les requêtes vers un modèle économique (SLM) ou puissant (LLM SOTA) selon la complexité.',
+                        problem: 'Envoyer toutes les requêtes vers GPT-4o ou Claude Opus est financièrement inefficace.',
+                        solution: 'Un classifieur rapide évalue la complexité avant de dérouter le prompt vers le modèle adéquat.',
+                        architectureDiagram: `User Prompt ──► Router Classifier 
+   ├─► Simple / Intent Match ──► SLM (Llama 8B)  [$0.001/1M tokens]
+   └─► Complex Reasoning     ──► LLM SOTA (GPT-4o) [$0.005/1M tokens]`,
+                        finopsDetails: 'Économie jusqu’à 70% des coûts en redirigeant 60%+ des tâches simples.',
+                        observabilityMetrics: ['Routing Ratio (SLM vs LLM)', 'Classification Accuracy', 'Cost Per Request ($)'],
+                        tools: ['RouteLLM', 'LiteLLM', 'Unify AI', 'Spring AI Router'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gravitee Dynamic Routing Policy basée sur le score d’intention renvoyé par l’intercepteur.',
+                            kafka: 'Collecte et streaming des événements de métriques de routage dans Kafka pour ajuster le classifieur.',
+                            springBoot: 'Microservice Spring Boot avec Spring AI `ChatModelRouter` basculant dynamiquement entre `OllamaChatModel` et `OpenAiChatModel`.'
+                        }
+                    },
+                    {
+                        id: 'prompt-compression',
+                        name: 'Prompt Compression & Context Pruning',
+                        category: 'finops',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Modéré',
+                        shortDesc: 'Compression d’information du prompt en supprimant les mots à faible charge sémantique avant transmission au LLM.',
+                        problem: 'Les invites et contextes RAG volumineux coûtent cher et ralentissent le temps de réponse (TTFT).',
+                        solution: 'Utilisation d’un modèle de compression d’information (ex: LLMLingua) pour élaguer jusqu’à 50% des tokens non essentiels.',
+                        architectureDiagram: `Large Context + Prompt ──► LLMLingua Compressor ──► Pruned Prompt (50% smaller) ──► LLM API Call`,
+                        finopsDetails: 'Diminue la consommation de tokens de 30% à 50% sur les contextes documentaires très longs.',
+                        observabilityMetrics: ['Compression Ratio (%)', 'Information Retention Score', 'Cost Reduction ($)'],
+                        tools: ['LLMLingua', 'CompactPrompt', 'Spring AI Transformers'],
+                        enterpriseIntegration: {
+                            gravitee: 'Transformation Policy de payload réduisant la taille du body JSON.',
+                            kafka: 'Kafka Streams filter job pour prétraiter et compresser les logs de contexte.',
+                            springBoot: 'Service Spring Boot Java intégrant ONNX Runtime pour exécuter LLMLingua en local.'
+                        }
+                    },
+                    {
+                        id: 'speculative-decoding',
+                        name: 'Speculative Decoding Pattern',
+                        category: 'finops',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Très Faible (2x-3x Speedup)',
+                        shortDesc: 'Un petit modèle (Draft) génère rapidement des tokens candidats validés en parallèle par un grand modèle (Target).',
+                        problem: 'La génération token par token des grands modèles LLM souffre d’une latence d’inférence trop élevée.',
+                        solution: 'Combinaison d’un SLM local ultra-rapide émettant 5 tokens et du LLM principal les validant en une seule passe matricielle.',
+                        architectureDiagram: `Draft Model (SLM 1B) ──► Generates K candidate tokens fast
+   ──► Target Model (LLM 70B) ──► Parallel Validation ──► Accept/Reject Tokens`,
+                        finopsDetails: 'Divise la latence par 2 à 3 à coût de calcul équivalent.',
+                        observabilityMetrics: ['Token Acceptance Rate (%)', 'Speedup Factor (x)', 'Latency Reduction'],
+                        tools: ['vLLM Speculative Engine', 'TGI HuggingFace', 'Ollama Speculative'],
+                        enterpriseIntegration: {
+                            gravitee: 'Pass-through transparent tirant parti de la réduction du TTFT.',
+                            kafka: 'Audit de la performance d’inférence en continu via Kafka Metric Reporters.',
+                            springBoot: 'Microservice Java consommant les endpoints vLLM configurés avec Speculative Decoding.'
+                        }
+                    },
+
+                    // --- CATEGORY: AGENTS & ORCHESTRATION ---
+                    {
+                        id: 'react-agent-loop',
+                        name: 'ReAct (Reasoning + Acting) Agent Pattern',
+                        category: 'agents',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Modéré (Iterative)',
+                        shortDesc: 'Boucle de raisonnement entrelacée d’actions outillées (Pensée -> Action -> Observation -> Pensée finale).',
+                        problem: 'Le LLM seul ne peut pas effectuer d’actions concrètes dans le SI (interroger une BDD, envoyer un email, appeler une API).',
+                        solution: 'Fournir au LLM des outils (Tools/Functions Java) et l’obliger à formuler un plan étape par étape.',
+                        architectureDiagram: `User Goal ──► LLM [Thought] ──► Select Tool Call [Action]
+   ──► Execute Java Function [Observation] ──► LLM Final Synthesis`,
+                        finopsDetails: 'Imposer un nombre maximal de boucles (Max Loops = 4) sous peine d’emballement des coûts.',
+                        observabilityMetrics: ['Loop Count per Execution', 'Tool Call Error Rate', 'Agent Goal Success Rate'],
+                        tools: ['LangChain4j Function Calling', 'Spring AI Tools', 'LangGraph'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gateway protégeant les APIs système exécutées comme des "Tools" par l’Agent.',
+                            kafka: 'Chaque appel d’outil par l’agent émet un événement d’audit sur Kafka `agent-tool-invocations`.',
+                            springBoot: 'Déclaration des méthodes Java annotées `@Tool` ou `@Bean` consommables par Spring AI.'
+                        }
+                    },
+                    {
+                        id: 'supervisor-multi-agent',
+                        name: 'Supervisor Multi-Agent Pattern',
+                        category: 'agents',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Low',
+                        latencyImpact: 'Élevé',
+                        shortDesc: 'Un agent superviseur central délègue les tâches à des agents spécialistes autonomes (Codeur, Chercheur, Valideur).',
+                        problem: 'Les tâches complexes s’effondrent quand un seul prompt cherche à tout faire.',
+                        solution: 'Architecture hiérarchique où un Superviseur orchestre des sous-agents spécialisés équipés de leurs propres outils.',
+                        architectureDiagram: `User Query ──► Supervisor Agent 
+   ├──► Delegate to Research Agent
+   ├──► Delegate to Code Agent
+   └──► Delegate to Reviewer Agent ──► Supervisor Final Answer`,
+                        finopsDetails: 'Consommation élevée de tokens, à réserver aux processus métiers à haute valeur ajoutée.',
+                        observabilityMetrics: ['Sub-Agent Call Count', 'Task Handover Latency', 'Multi-Agent Completion Rate'],
+                        tools: ['LangGraph Java', 'Spring AI Orchestrator', 'AutoGen'],
+                        enterpriseIntegration: {
+                            gravitee: 'Routage dynamique entre les différents microservices d’agents spécialisés.',
+                            kafka: 'Choregraphie asynchrone des échanges inter-agents via les topics Kafka `agent-tasks` et `agent-results`.',
+                            springBoot: 'Architecture Microservices Spring Boot orchestrée via LangGraph Java.'
+                        }
+                    },
+                    {
+                        id: 'plan-and-execute-agent',
+                        name: 'Plan-and-Execute Agent Pattern',
+                        category: 'agents',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Modéré',
+                        shortDesc: 'Séparation explicite de la phase de planification (création d’une liste d’étapes) et de la phase d’exécution.',
+                        problem: 'Les agents ReAct perdent facilement le fil de leur objectif initial lors de longues exécutions.',
+                        solution: 'Un grand modèle génère un plan d’action complet. Des sous-modèles plus légers exécutent chaque étape séquentiellement.',
+                        architectureDiagram: `User Goal ──► Planner LLM (GPT-4o) ──► Step List [1, 2, 3] 
+   ──► Executor SLM (Llama-8B) runs each step ──► Re-Planner adjusts if failure`,
+                        finopsDetails: 'Économise des coûts en confiant l’exécution des étapes simples à des SLM très bon marché.',
+                        observabilityMetrics: ['Plan Replanning Frequency', 'Step Completion Success Rate', 'Execution Latency per Step'],
+                        tools: ['LangGraph', 'Spring AI', 'LangChain4j'],
+                        enterpriseIntegration: {
+                            gravitee: 'Gateway contrôlant la cadence d’exécution des étapes d’API.',
+                            kafka: 'Persistance de l’état du plan dans un State Store Kafka Streams pour tolérance aux pannes.',
+                            springBoot: 'Service Spring Boot orchestrateur gérant le cycle de vie du Plan d’Action.'
+                        }
+                    },
+
+                    // --- CATEGORY: FINE-TUNING & SPECIALIZATION ---
+                    {
+                        id: 'multi-lora-router',
+                        name: 'LoRA Adapter Routing (Multi-LoRA / S-LoRA)',
+                        category: 'specialization',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Very High',
+                        latencyImpact: 'Faible',
+                        shortDesc: 'Un seul modèle de base (Base LLM) hébergé en mémoire charge dynamiquement à la volée de légers adaptateurs LoRA métiers.',
+                        problem: 'Héberger 10 modèles d’IA spécialisés pour 10 directions métiers coûte une fortune en GPUs.',
+                        solution: 'Un cluster S-LoRA / vLLM héberge 1 seul grand modèle de base et permute les adapteurs LoRA (quelques Mo) selon le client.',
+                        architectureDiagram: `Request (Tenant: Legal) ──► Gateway ──► vLLM Base Model (Llama-3-70B)
+   ──► Dynamic Load: [LoRA-Legal-Adapter.safetensors] ──► Tailored Answer`,
+                        finopsDetails: 'Division par 10 de l’empreinte infrastructure GPU en mutualisant le modèle de base.',
+                        observabilityMetrics: ['LoRA Adapter Swap Time (ms)', 'GPU Memory Utilization', 'Multi-tenant Throughput'],
+                        tools: ['vLLM S-LoRA', 'HuggingFace PEFT', 'Ollama Multi-LoRA'],
+                        enterpriseIntegration: {
+                            gravitee: 'Extraction du header HTTP `X-Business-Unit` et injection du tag d’adaptateur LoRA correspondant.',
+                            kafka: 'Event streaming pour notifier le cluster GPU de pré-charger un adaptateur LoRA fréquemment utilisé.',
+                            springBoot: 'Spring Boot transmettant le paramètre `extra_body: {lora_adapter: "legal_v2"}` à vLLM.'
+                        }
+                    },
+                    {
+                        id: 'teacher-student-distillation',
+                        name: 'Teacher-Student LLM Distillation',
+                        category: 'specialization',
+                        complexity: 'Élevée',
+                        finopsImpact: 'Very High',
+                        latencyImpact: 'Très Faible',
+                        shortDesc: 'Distillation du savoir et du raisonnement d’un grand modèle (Teacher GPT-4) dans un petit modèle spécialisé (Student 3B-8B).',
+                        problem: 'Utiliser un LLM généraliste géant à $5/1M tokens pour des tâches répétitives structurées est trop coûteux.',
+                        solution: 'Génération d’un jeu de données de haute qualité par le modèle Teacher, puis Fine-Tuning SFT/DPO sur un petit modèle Student On-Prem.',
+                        architectureDiagram: `Task Prompts ──► Teacher LLM (GPT-4o) ──► Synthetic Dataset (10k examples)
+   ──► Fine-Tuning Pipeline (Unsloth) ──► Deploy Specialized Student SLM (Llama 8B)`,
+                        finopsDetails: 'Coût d’exécution par requête divisé par 50 avec des performances équivalentes sur le cas d’usage spécifique.',
+                        observabilityMetrics: ['Accuracy vs Teacher Benchmark (%)', 'Inference Cost Reduction (50x)', 'TTFT Speedup'],
+                        tools: ['Unsloth', 'Axolotl', 'HuggingFace TRL', 'vLLM'],
+                        enterpriseIntegration: {
+                            gravitee: 'Routage transparent vers le microservice hébergeant le modèle SLM distillé On-Premise.',
+                            kafka: 'Collecte continue des cas complexes non résolus pour enrichir le dataset de la prochaine session de distillation.',
+                            springBoot: 'Spring Boot interrogeant le modèle SLM spécialisé via l’interface Spring AI Standard.'
+                        }
+                    }
+                ],
+
+                // Computed / Filtered Getters
+                get filteredPatterns() {
+                    return this.patterns.filter(p => {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        const matchesQuery = !q || 
+                            p.name.toLowerCase().includes(q) || 
+                            p.shortDesc.toLowerCase().includes(q) || 
+                            p.problem.toLowerCase().includes(q) ||
+                            p.tools.some(t => t.toLowerCase().includes(q));
+
+                        const matchesCategory = this.selectedCategory === 'ALL' || p.category === this.selectedCategory;
+                        const matchesComplexity = !this.filterComplexity || p.complexity === this.filterComplexity;
+                        const matchesFinops = !this.filterFinops || p.finopsImpact === this.filterFinops;
+
+                        return matchesQuery && matchesCategory && matchesComplexity && matchesFinops;
+                    });
+                },
+
+                get filteredGlossary() {
+                    const q = this.glossarySearch.toLowerCase().trim();
+                    if (!q) return this.glossaryTerms;
+                    return this.glossaryTerms.filter(item => 
+                        item.term.toLowerCase().includes(q) || 
+                        item.category.toLowerCase().includes(q) || 
+                        item.definition.toLowerCase().includes(q) || 
+                        item.architectContext.toLowerCase().includes(q)
+                    );
+                },
+
+                // Helper Methods
+                getPattern(id) {
+                    return this.patterns.find(p => p.id === id) || {};
+                },
+
+                getCategoryName(catId) {
+                    const cat = this.categories.find(c => c.id === catId);
+                    return cat ? cat.name : catId;
+                },
+
+                getCategoryBadgeClass(catId) {
+                    const map = {
+                        rag: 'bg-blue-950/80 text-blue-300 border border-blue-800/50',
+                        eval: 'bg-amber-950/80 text-amber-300 border border-amber-800/50',
+                        obs: 'bg-purple-950/80 text-purple-300 border border-purple-800/50',
+                        finops: 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/50',
+                        agents: 'bg-pink-950/80 text-pink-300 border border-pink-800/50',
+                        specialization: 'bg-indigo-950/80 text-indigo-300 border border-indigo-800/50',
+                        security: 'bg-red-950/80 text-red-300 border border-red-800/50'
+                    };
+                    return map[catId] || 'bg-slate-800 text-slate-300';
+                },
+
+                toggleCompare(id) {
+                    if (this.selectedForCompare.includes(id)) {
+                        this.selectedForCompare = this.selectedForCompare.filter(i => i !== id);
+                    } else {
+                        if (this.selectedForCompare.length < 4) {
+                            this.selectedForCompare.push(id);
+                        } else {
+                            this.showToast("Maximum 4 patterns dans le comparateur");
+                        }
+                    }
+                },
+
+                openModal(pattern) {
+                    this.activePattern = pattern;
+                    this.isModalOpen = true;
+                },
+
+                closeModal() {
+                    this.isModalOpen = false;
+                    this.activePattern = null;
+                },
+
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.selectedCategory = 'ALL';
+                    this.filterComplexity = '';
+                    this.filterFinops = '';
+                },
+
+                // FinOps Simulator Calculations
+                calculateRawCost() {
+                    const totalTokens = (this.finopsCalc.monthlyRequests * this.finopsCalc.avgTokensPerReq) / 1000000;
+                    return totalTokens * parseFloat(this.finopsCalc.baseModelCost) * 1000;
+                },
+
+                calculateOptimizedCost() {
+                    let cost = this.calculateRawCost();
+                    if (this.finopsCalc.enableCache) {
+                        cost *= 0.70; // -30% grâce au cache sémantique
+                    }
+                    if (this.finopsCalc.enableRouter) {
+                        cost *= 0.40; // -60% redirigé vers modèles légers
+                    }
+                    if (this.finopsCalc.enableCompress) {
+                        cost *= 0.80; // -20% sur la taille des contextes
+                    }
+                    return cost;
+                },
+
+                calculateSavingsPercent() {
+                    const raw = this.calculateRawCost();
+                    if (raw === 0) return 0;
+                    const opt = this.calculateOptimizedCost();
+                    return Math.round(((raw - opt) / raw) * 100);
+                },
+
+                formatCurrency(val) {
+                    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val || 0);
+                },
+
+                copyMarkdownADR(pattern) {
+                    const enterpriseSection = pattern.enterpriseIntegration ? `
+## Implémentation Entreprise Stack Standard
+- **Gravitee API Gateway**: ${pattern.enterpriseIntegration.gravitee}
+- **Apache Kafka Stream**: ${pattern.enterpriseIntegration.kafka}
+- **Spring Boot 3 & Java Stack**: ${pattern.enterpriseIntegration.springBoot}
+` : '';
+
+                    const adrText = `# Architecture Decision Record (ADR) - ${pattern.name}
+
+## Statut
+Proposé / Validé
+
+## Contexte & Problématique Métier
+${pattern.problem}
+
+## Pattern d'Architecture Retenu
+${pattern.solution}
+
+## Flux Architectural (Sequence Flow)
+\`\`\`
+${pattern.architectureDiagram}
+\`\`\`
+${enterpriseSection}
+## Impact FinOps & Stratégie de Coûts
+- **Niveau d'impact**: ${pattern.finopsImpact}
+- **Détails**: ${pattern.finopsDetails}
+
+## Métriques d'Observabilité Ciblées
+${pattern.observabilityMetrics.map(m => `- ${m}`).join('\n')}
+
+## Outillage & Écosystème Recommandé
+${pattern.tools.join(', ')}
+`;
+                    navigator.clipboard.writeText(adrText).then(() => {
+                        this.showToast("Fiche ADR Markdown (avec intégration Gravitee/Kafka/Spring) copiée !");
+                    });
+                },
+
+                showToast(msg) {
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-5 right-5 bg-sky-500 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold z-50 animate-bounce';
+                    toast.innerText = msg;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                },
+
+                initApp() {
+                    lucide.createIcons();
+                    this.$watch('currentView', () => setTimeout(() => lucide.createIcons(), 50));
+                    this.$watch('isModalOpen', () => setTimeout(() => lucide.createIcons(), 50));
+                    this.$watch('selectedCategory', () => setTimeout(() => lucide.createIcons(), 50));
+                    this.$watch('searchQuery', () => setTimeout(() => lucide.createIcons(), 50));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
