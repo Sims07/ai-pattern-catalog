@@ -24,7 +24,8 @@
                         rag: '#3b82f6',
                         judge: '#f59e0b',
                         agent: '#ec4899',
-                        sec: '#ef4444'
+                        sec: '#ef4444',
+                        perf: '#f97316'
                     }
                 }
             }
@@ -550,7 +551,7 @@
                                     <!-- Spring Boot -->
                                     <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
                                         <div class="text-[11px] font-bold text-emerald-400 mb-1 flex items-center gap-1">
-                                            <i data-lucide="code-2" class="w-3.5 h-3.5"></i> Spring Boot 3 & Spring AI
+                                            <i data-lucide="code-2" class="w-3.5 h-3.5"></i> Spring Boot & Spring AI
                                         </div>
                                         <p class="text-[11px] text-slate-300 leading-relaxed" x-text="activePattern.enterpriseIntegration.springBoot"></p>
                                     </div>
@@ -608,6 +609,7 @@
                     { id: 'eval', name: 'LLM-as-a-Judge & Eval', shortName: 'Eval', activeBg: 'bg-amber-600', dotColor: 'bg-amber-400' },
                     { id: 'obs', name: 'Observabilité & Tracing', shortName: 'Obs', activeBg: 'bg-purple-600', dotColor: 'bg-purple-400' },
                     { id: 'finops', name: 'FinOps & Optimization', shortName: 'FinOps', activeBg: 'bg-emerald-600', dotColor: 'bg-emerald-400' },
+                    { id: 'perf', name: 'Performance & Inférence', shortName: 'Perf', activeBg: 'bg-orange-600', dotColor: 'bg-orange-400' },
                     { id: 'agents', name: 'Orchestration & Agents', shortName: 'Agents', activeBg: 'bg-pink-600', dotColor: 'bg-pink-400' },
                     { id: 'specialization', name: 'Fine-Tuning & Distillation', shortName: 'LoRA', activeBg: 'bg-indigo-600', dotColor: 'bg-indigo-400' },
                     { id: 'security', name: 'Sécurité & Anonymisation PII', shortName: 'Sécurité', activeBg: 'bg-red-600', dotColor: 'bg-red-400' }
@@ -630,7 +632,7 @@
                         term: 'Semantic Caching',
                         category: 'FinOps & Latence',
                         definition: 'Mise en cache des réponses LLM basée sur la proximité vectorielle (distance Cosine) des questions plutôt qu’un hachage exact.',
-                        architectContext: 'Permet des gains de coût de 20% à 45% et une latence quasi-nulle (~10ms) sur les requêtes redondantes.'
+                        architectContext: 'Permet des gains de coût de 20% à 45% et une latence quasi-nulle (~10ms) sur les requêtes redondantes. Nécessite une calibration du seuil selon le domaine.'
                     },
                     {
                         term: 'LLM Router / Model Cascading',
@@ -642,7 +644,13 @@
                         term: 'GraphRAG (Knowledge Graph)',
                         category: 'RAG & Recherche Vectorielle',
                         definition: 'Combinaison de bases de données vectorielles et de graphes de connaissances (Neo4j) pour capturer les relations entre entités.',
-                        architectContext: 'Essentiel pour répondre à des questions complexes sur des documents entrelacés ou structurés en réseau.'
+                        architectContext: 'Essentiel pour répondre à des questions complexes sur des documents entrelacés. Coût d’indexation initial élevé (200-500$ pour 1000 docs).'
+                    },
+                    {
+                        term: 'Contextual Retrieval',
+                        category: 'RAG & Recherche Vectorielle',
+                        definition: 'Technique Anthropic qui préfixe chaque chunk avec un contexte généré par LLM avant embedding, réduisant le taux d’échec de 35% à 49%.',
+                        architectContext: 'Améliore radicalement la précision du RAG sur des documents volumineux où les chunks isolés perdent leur sens.'
                     },
                     {
                         term: 'RAG Triad (Faithfulness, Relevance, Context)',
@@ -677,8 +685,20 @@
                     {
                         term: 'LangChain4j / Spring AI',
                         category: 'Frameworks Java Enterprise',
-                        definition: 'Projets fondateurs pour intégrer l’IA Générative de manière native dans les microservices Java / Spring Boot 3.',
+                        definition: 'Projets fondateurs pour intégrer l’IA Générative de manière native dans les microservices Java / Spring Boot.',
                         architectContext: 'Offre des abstractions type ChatModel, VectorStore et RAG Pipelines prêtes pour le monde entreprise.'
+                    },
+                    {
+                        term: 'Cost Attribution & Chargeback',
+                        category: 'FinOps & Gouvernance',
+                        definition: 'Émission d’événements de coût par requête (tenant, projet, modèle, tokens) pour facturation interne et dashboards FinOps.',
+                        architectContext: 'Indispensable pour les organisations multi-BU ou SaaS multi-tenant. Rend chaque dollar dépensé visible et facturable.'
+                    },
+                    {
+                        term: 'Graceful Degradation',
+                        category: 'Résilience & FinOps',
+                        definition: 'Chaîne de fallback ordonnée (LLM SOTA → SLM → Cache → Template → Erreur gracieuse) pour maintenir la disponibilité applicative.',
+                        architectContext: 'Garantit qu’une panne API LLM ne rend jamais l’application totalement indisponible, tout en contrôlant les coûts de fallback.'
                     }
                 ],
 
@@ -699,11 +719,11 @@
    ──► Kafka [topic: doc-clean] ──► LLM API Processing ──► Spring Boot Client Re-hydration`,
                         finopsDetails: 'Évite les sanctions RGPD massives et réduit la taille du contexte en remplaçant les entités complexes par des tokens courts.',
                         observabilityMetrics: ['PII Masking Precision (%)', 'Vault Lookup Latency (ms)', 'Unmasked Leakage Alert Rate'],
-                        tools: ['Microsoft Presidio', 'HashiCorp Vault', 'Spring Boot 3', 'Kafka', 'LangChain4j'],
+                        tools: ['Microsoft Presidio', 'HashiCorp Vault', 'Spring Boot', 'Kafka', 'LangChain4j'],
                         enterpriseIntegration: {
                             gravitee: 'Policy de filtrage et contrôle regex sur headers/payload HTTP pour bloquer toute fuite de NIR/IBAN non anonymisé.',
                             kafka: 'Microservice Redactor à l’écoute du topic `raw-documents-v1`. Publication des documents nettoyés sur `sanitized-documents-v1`.',
-                            springBoot: 'Application Spring Boot 3 avec `@KafkaListener`. SDK Presidio Java ou sidecar REST avec Spring AI ChatModel.'
+                            springBoot: 'Application Spring Boot avec `@KafkaListener`. SDK Presidio Java ou sidecar REST avec Spring AI ChatModel.'
                         }
                     },
                     {
@@ -749,27 +769,50 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                             springBoot: 'Application Spring Boot WebFlux réactive orchestrant l’appel local vLLM puis le modèle distant.'
                         }
                     },
+                    {
+                        id: 'multi-tenant-llm-isolation',
+                        name: 'Multi-Tenant LLM Isolation & Quotas',
+                        category: 'security',
+                        complexity: 'Élevée',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Négligeable',
+                        shortDesc: 'Isolation stricte des workloads LLM par tenant : quotas API, Vector Stores filtrés, tracking de coût individualisé.',
+                        problem: 'Un tenant SaaS peut épuiser le quota API LLM d’un autre, ou accéder à des données indexées d’autres clients.',
+                        solution: 'Isolation à 3 niveaux : quotas Gravitee par tenant (header X-Tenant-ID), métadonnées `tenant_id` dans la Vector DB avec filtrage systématique, et tracking de coût par tenant.',
+                        architectureDiagram: `Request + JWT (tenant_id) ──► Gravitee Quota Policy
+   ├─► [Quota OK] ──► Vector DB Filter [tenant_id == X]
+   └─► [Quota Exceeded] ──► 429 + Émission événement Kafka billing
+   ──► LLM Call ──► Cost Attribution par tenant`,
+                        finopsDetails: 'Permet le chargeback FinOps par tenant. Évite les abus et garantit la soutenabilité économique du modèle SaaS.',
+                        observabilityMetrics: ['Per-Tenant Request Count', 'Per-Tenant Cost ($)', 'Quota Violation Rate', 'Cross-Tenant Access Attempts'],
+                        tools: ['Gravitee Quota Policy', 'Pgvector Metadata Filter', 'Kafka', 'Spring Security'],
+                        enterpriseIntegration: {
+                            gravitee: 'Policy de quota par tenant avec header `X-Tenant-ID` extrait du JWT OAuth2.',
+                            kafka: 'Topic `tenant-cost-events` agrégé par fenêtre temporelle pour facturation mensuelle.',
+                            springBoot: 'Spring Security avec `@PreAuthorize` et filtrage dynamique `VectorStore.withFilter("tenant_id == \'X\'")`.'
+                        }
+                    },
 
                     // --- CATEGORY: RAG & KNOWLEDGE ---
                     {
-                        id: 'naive-rag',
-                        name: 'Baseline / Naive RAG Pattern',
+                        id: 'baseline-rag',
+                        name: 'Baseline RAG (Anti-Pattern Reference)',
                         category: 'rag',
                         complexity: 'Faible',
                         finopsImpact: 'Medium',
                         latencyImpact: 'Faible (~300ms)',
-                        shortDesc: 'Découpage documentaire basique, vectorisation, recherche des K plus proches voisins et injection dans le prompt LLM.',
+                        shortDesc: 'Pattern de référence minimaliste (chunking naïf, top-K vectoriel) — À utiliser uniquement comme baseline de comparaison, non recommandé en production.',
                         problem: 'Le LLM ne connaît pas les données privées de l’entreprise et produit des réponses obsolètes ou approximatives.',
-                        solution: 'Pipeline standard Ingestion -> Chunking (500 tokens) -> Vector DB -> Top-K Retrieval -> Injection Contextuelle.',
+                        solution: 'Pipeline standard Ingestion -> Chunking (500 tokens) -> Vector DB -> Top-K Retrieval -> Injection Contextuelle. Sert de point de départ pour mesurer les gains des patterns Advanced RAG et Contextual Retrieval.',
                         architectureDiagram: `Query ──► Embedding Model ──► Vector Store Search (Top-K)
    ──► Inject Context in Prompt ──► LLM Call ──► Final Answer`,
-                        finopsDetails: 'Coût modéré mais risque de surcharge de tokens si le découpage est trop large.',
-                        observabilityMetrics: ['Retrieval Latency', 'Vector Hit Score', 'Token Context Size'],
+                        finopsDetails: 'Coût modéré mais risque de surcharge de tokens si le découpage est trop large. Échecs fréquents sur les références exactes (codes, IDs).',
+                        observabilityMetrics: ['Retrieval Latency', 'Vector Hit Score', 'Token Context Size', 'Retrieval Failure Rate'],
                         tools: ['Spring AI Vector Store', 'Pgvector', 'LangChain4j', 'OpenAI Embeddings'],
                         enterpriseIntegration: {
                             gravitee: 'Gravitee API Gateway gérant l’authentification OAuth2 et la limitation de débit (Rate Limiting).',
                             kafka: 'Kafka Ingestion Pipeline consommant les nouveaux fichiers PDF sur le topic `document-ingestion-v1`.',
-                            springBoot: 'Service Spring Boot 3 utilisant Spring AI `PgVectorStore` et `ChatClient`.'
+                            springBoot: 'Service Spring Boot utilisant Spring AI `PgVectorStore` et `ChatClient`.'
                         }
                     },
                     {
@@ -794,6 +837,28 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         }
                     },
                     {
+                        id: 'contextual-retrieval',
+                        name: 'Contextual Retrieval (Anthropic Pattern)',
+                        category: 'rag',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Faible (indexation uniquement)',
+                        shortDesc: 'Préfixe chaque chunk avec un contexte généré par le LLM avant embedding, réduisant le taux d’échec de récupération de 35% à 49%.',
+                        problem: 'Un chunk isolé perd son sens : "Le chiffre d’affaires a augmenté de 3%" ne dit pas de quelle entreprise ni de quelle année on parle.',
+                        solution: 'Pour chaque chunk, appeler un LLM léger (Claude Haiku) pour générer 1-2 phrases de contexte ("Ce chunk provient du rapport Q3 2024 de la filiale Acme...") avant l’embedding.',
+                        architectureDiagram: `Document ──► Chunking (500 tokens)
+   ──► Pour chaque chunk : LLM Contextualizer (Claude Haiku) ──► "Ce chunk concerne..."
+   ──► Concat Context + Chunk ──► Embedding ──► Vector DB`,
+                        finopsDetails: 'Coût d’indexation one-shot : ~1$ pour 1000 documents avec Haiku (avec prompt caching). Gain de précision Retrieval : +35% à +49%.',
+                        observabilityMetrics: ['Retrieval Failure Rate (%)', 'Context Generation Cost', 'Chunk Context Relevance'],
+                        tools: ['Claude Haiku API', 'Spring AI', 'LangChain4j', 'Prompt Caching'],
+                        enterpriseIntegration: {
+                            gravitee: 'Rate limiting sur l’endpoint LLM Contextualizer pour contrôler le coût d’indexation batch.',
+                            kafka: 'Pipeline d’ingestion événementiel : chaque document déclenche une tâche de contextualisation asynchrone.',
+                            springBoot: 'Spring Boot avec Spring Batch pour paralléliser la contextualisation des chunks par batchs de 50.'
+                        }
+                    },
+                    {
                         id: 'graph-rag',
                         name: 'GraphRAG (Knowledge Graph Augmented Generation)',
                         category: 'rag',
@@ -805,13 +870,13 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         solution: 'Construction d’un Knowledge Graph (Neo4j) couplé à la recherche vectorielle. Traversée de graphe lors de la requête.',
                         architectureDiagram: `Query ──► Vector Retrieval + Graph Subgraph Extraction (Neo4j Cypher)
    ──► Synthesize Entity Relationships ──► Structured Prompt ──► LLM Answer`,
-                        finopsDetails: 'Coût d’indexation initial élevé mais grande précision sur les analyses d’impact complexes.',
+                        finopsDetails: 'Coût d’indexation initial élevé : ~200-500$ pour 1000 documents (extraction d’entités LLM + résolution de coréférences) vs ~5-10$ pour un RAG vectoriel classique. Grande précision sur les analyses d’impact complexes.',
                         observabilityMetrics: ['Graph Subgraph Size', 'Cypher Query Execution Time', 'Context Completeness Score'],
                         tools: ['Neo4j', 'LangChain4j GraphRAG', 'Spring Data Neo4j', 'LlamaIndex'],
                         enterpriseIntegration: {
                             gravitee: 'Gateway interceptant les appels d’analyse de risques et appliquant des politiques d’autorisation renforcées.',
                             kafka: 'Consommation des événements métier Kafka pour mettre à jour les nœuds et relations dans Neo4j.',
-                            springBoot: 'Spring Boot 3 avec `Spring Data Neo4j` pour les requêtes Cypher dynamiques et Spring AI pour la synthèse.'
+                            springBoot: 'Spring Boot avec `Spring Data Neo4j` pour les requêtes Cypher dynamiques et Spring AI pour la synthèse.'
                         }
                     },
                     {
@@ -821,13 +886,13 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         complexity: 'Moyenne',
                         finopsImpact: 'High',
                         latencyImpact: 'Variable (selon Fallback)',
-                        shortDesc: 'Un évaluateur léger vérifie la qualité des documents extraits et bascule automatiquement sur une recherche Web en cas d’insuffisance.',
+                        shortDesc: 'Un évaluateur léger classe le contexte extrait en Correct / Incorrect / Ambiguous et déclenche une stratégie de fallback adaptée.',
                         problem: 'Si la base de connaissances ne contient pas la réponse, le RAG classique force le LLM à halluciner sur un mauvais contexte.',
-                        solution: 'Un module d’évaluation attribue un score au contexte extrait. Si Score < Seuil, déclenchement automatique d’une API Web (Tavily/Serper) ou de la base secondaire.',
-                        architectureDiagram: `Query ──► Retrieval ──► Context Evaluator 
-   ├─► [Correct]   ──► Standard RAG LLM
-   ├─► [Ambiguous] ──► Query Transformation + Web Search Fallback
-   └─► [Incorrect] ──► Web Search Only ──► LLM Answer`,
+                        solution: 'Un évaluateur léger (T5 fine-tuné) classe le contexte extrait en trois catégories : Correct, Incorrect ou Ambiguous. Chaque catégorie déclenche une stratégie de fallback spécifique (refinement des chunks, query rewriting + web search, ou web search pur).',
+                        architectureDiagram: `Query ──► Retrieval ──► Lightweight Evaluator (T5 fine-tuned)
+   ├─► [Correct]   ──► Standard RAG avec refinement des chunks
+   ├─► [Ambiguous] ──► Query Rewriting + RAG + Web Search combinés
+   └─► [Incorrect] ──► Web Search uniquement ──► LLM Answer`,
                         finopsDetails: 'Évite les appels coûteux au grand LLM quand le contexte extrait est inutilisable.',
                         observabilityMetrics: ['Retrieval Accuracy Grade', 'Fallback Trigger Rate', 'Hallucination Prevention Score'],
                         tools: ['Tavily Search API', 'LangChain4j', 'Spring AI', 'Resilience4j'],
@@ -844,11 +909,14 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         complexity: 'Élevée',
                         finopsImpact: 'Medium',
                         latencyImpact: 'Élevé (Iterative Loop)',
-                        shortDesc: 'Le LLM évalue lui-même par jetons de réflexion l’utilité du contexte, la fidélité de sa réponse et sa pertinence.',
+                        shortDesc: 'Le LLM évalue lui-même par jetons de réflexion l’utilité du contexte, la fidélité de sa réponse et sa pertinence, en cours de génération.',
                         problem: 'Nécessite une autorégulation avancée pour garantir une fiabilité à 100% sur des processus bancaires ou légaux critiques.',
-                        solution: 'Entraînement/Prompting du LLM pour émettre des jetons de contrôle (`[IsRel]`, `[IsSup]`, `[IsUse]`) et auto-corriger ses réponses.',
-                        architectureDiagram: `Query ──► Parallel Retrieval ──► Segment LLM Generation + Self-Critic Tokens [IsRel, IsSup]
-   ──► Filter Unsupported Segments ──► Final Cleaned Answer`,
+                        solution: 'Entraînement/Prompting du LLM pour émettre des jetons de contrôle (`[Retrieve]`, `[IsRel]`, `[IsSup]`, `[IsUse]`) de façon autorégressive pendant la génération, et auto-corriger ses réponses.',
+                        architectureDiagram: `Query ──► LLM Génération Autorégressive avec Tokens de Réflexion
+   ├─► [Retrieve?] ──► Si oui, Retrieval ──► [IsRel?] ──► Filtre contexte non pertinent
+   ├─► [IsSup?]  ──► Vérifie que chaque segment est factuellement supporté par le contexte
+   └─► [IsUse?]  ──► Score d’utilité finale (1-5) attribué à chaque segment
+   ──► Output filtré (segments avec [IsUse >= 4])`,
                         finopsDetails: 'Incurre des coûts de tokens supplémentaires par requête, réservé aux cas d’usage à très haute valeur ajoutée.',
                         observabilityMetrics: ['Reflection Token Ratio', 'Self-Correction Rate', 'Faithfulness Score'],
                         tools: ['Self-RAG Fine-tuned SLM', 'LangGraph Java', 'Spring Boot WebFlux'],
@@ -876,7 +944,7 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         enterpriseIntegration: {
                             gravitee: 'Gravitee exposant les outils internes sous forme d’OpenAPI sécurisées consommables par l’Agent.',
                             kafka: 'Enregistrement de chaque étape intermédiaire d’agent dans Kafka `agent-execution-trace`.',
-                            springBoot: 'Spring Boot 3 tirant parti des `@Bean` de Function Calling Spring AI (`@Description`).'
+                            springBoot: 'Spring Boot tirant parti des `@Bean` de Function Calling Spring AI (`@Description`).'
                         }
                     },
 
@@ -916,11 +984,34 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
    ──► Output Guardrail (Schema & Toxicity Check) ──► Final User Response`,
                         finopsDetails: 'Bloque les attaques en amont sans consommer de tokens sur le LLM principal.',
                         observabilityMetrics: ['Blocked Attack Count', 'Guardrail Latency Overhead', 'Schema Validation Failure Rate'],
-                        tools: ['NeMo Guardrails', 'Llama Guard', 'Guardrails AI', 'Spring Boot Bean Validation'],
+                        tools: ['NeMo Guardrails', 'Llama Guard', 'Guardrails AI', 'Spring Bean Validation'],
                         enterpriseIntegration: {
                             gravitee: 'Custom Gravitee Policy interceptant les attaques de type Prompt Injection connues.',
                             kafka: 'Publication immédiate des alertes de sécurité sur le topic Kafka `security-jailbreak-attempts`.',
                             springBoot: 'Validateur Spring Boot `@ControllerAdvice` vérifiant la conformité du JSON renvoyé par Spring AI.'
+                        }
+                    },
+                    {
+                        id: 'structured-output-guardrails',
+                        name: 'Structured Output Guardrails (JSON Schema Validation)',
+                        category: 'eval',
+                        complexity: 'Faible',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Très Faible (+20ms)',
+                        shortDesc: 'Validation stricte des sorties LLM contre un JSON Schema ou un modèle Pydantic/Bean Validation, avec retry automatique.',
+                        problem: 'Les LLM génèrent du JSON invalide ou avec des champs manquants, cassant les pipelines applicatifs en aval.',
+                        solution: 'Définir un schéma strict, utiliser Structured Outputs / Function Calling du fournisseur LLM, et valider côté application avec retry exponentiel en cas d’échec.',
+                        architectureDiagram: `Prompt + JSON Schema ──► LLM (Structured Output mode)
+   ──► Validation Bean Validation / JSON Schema
+   ├─► [Valide]   ──► Application Logic
+   └─► [Invalide] ──► Retry (max 3) avec feedback d’erreur ──► Final Fallback`,
+                        finopsDetails: 'Évite les retries coûteux en amont et les crashs applicatifs en aval. Réduit de 90% les erreurs de parsing.',
+                        observabilityMetrics: ['Schema Validation Failure Rate', 'Retry Rate', 'Average Retries per Request'],
+                        tools: ['OpenAI Structured Outputs', 'Pydantic', 'Jackson JSON Schema', 'Spring Bean Validation'],
+                        enterpriseIntegration: {
+                            gravitee: 'Rejet en amont (400 Bad Request) si le schéma demandé n’est pas déclaré dans le contrat OpenAPI.',
+                            kafka: 'Publication des échecs de validation sur `llm-schema-violations` pour analyse qualité.',
+                            springBoot: 'Annotations `@Valid` + `@ControllerAdvice` pour valider les DTOs de sortie LLM.'
                         }
                     },
                     {
@@ -966,7 +1057,31 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         enterpriseIntegration: {
                             gravitee: 'Injection et propagation des W3C Trace Context Headers (`traceparent`).',
                             kafka: 'Propagation des entêtes OpenTelemetry dans les Kafka Record Headers.',
-                            springBoot: 'Spring Boot 3 `Micrometer Tracing` couplé au SDK OpenInference pour LangChain4j.'
+                            springBoot: 'Spring Boot `Micrometer Tracing` couplé au SDK OpenInference pour LangChain4j.'
+                        }
+                    },
+                    {
+                        id: 'prompt-versioning-ab-testing',
+                        name: 'Prompt Versioning & A/B Testing',
+                        category: 'obs',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'Medium',
+                        latencyImpact: 'Négligeable',
+                        shortDesc: 'Gestion versionnée des prompts (Git-like) et A/B testing en production avec routage par cohorte et mesure d’impact.',
+                        problem: 'Modifier un prompt en production sans contrôle revient à déployer sans tests. Aucune traçabilité des régressions.',
+                        solution: 'Centraliser les prompts dans un registre versionné (DB ou fichier Git), associer un `prompt_version_id` à chaque requête, router 5-10% du trafic vers la nouvelle version et comparer les métriques.',
+                        architectureDiagram: `Request ──► Router A/B (hash user_id % 100)
+   ├─► [0-90]  ──► Prompt v1.2 (stable)
+   └─► [91-100] ──► Prompt v1.3 (canary)
+   ──► Log [prompt_version_id, metrics, cost]
+   ──► Analyse comparative (qualité, coût, latence)`,
+                        finopsDetails: 'Permet de détecter les régressions de coût avant déploiement global. Réduit les incidents de production liés aux prompts.',
+                        observabilityMetrics: ['Prompt Version Distribution', 'A/B Quality Score Delta', 'A/B Cost Delta', 'Rollback Frequency'],
+                        tools: ['Langfuse', 'PromptLayer', 'Git', 'Spring Cloud Config'],
+                        enterpriseIntegration: {
+                            gravitee: 'Routage par header `X-Prompt-Version` ou par cohorte utilisateur (hash du JWT `sub`).',
+                            kafka: 'Topic `prompt-execution-events` avec `prompt_version_id` pour analyse batch.',
+                            springBoot: 'Spring Cloud Config ou base PostgreSQL avec `@ConfigurationProperties` rechargés à chaud.'
                         }
                     },
                     {
@@ -1005,8 +1120,8 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         architectureDiagram: `User Query --> Vector Embedding --> Vector Cache Lookup (Redis)
    ├─► [CACHE HIT  (Sim >= 0.92)] ──► Return Cached Answer (10ms, $0)
    └─► [CACHE MISS (Sim < 0.92)]  ──► LLM API Call ──► Store Answer in Cache`,
-                        finopsDetails: 'Réduction directe de 20% à 45% de la facture LLM selon la redondance des requêtes.',
-                        observabilityMetrics: ['Cache Hit Ratio (%)', 'Embedding Latency (ms)', 'Token Cost Saved ($)'],
+                        finopsDetails: 'Réduction directe de 20% à 45% de la facture LLM selon la redondance des requêtes. Calibration du seuil : 0.92-0.95 pour domaines spécialisés (juridique, médical), 0.85-0.90 pour FAQ générales. Monitorer impérativement le taux de faux positifs (réponses incorrectes servies depuis le cache).',
+                        observabilityMetrics: ['Cache Hit Ratio (%)', 'Embedding Latency (ms)', 'Token Cost Saved ($)', 'False Positive Rate'],
                         tools: ['Redis VL', 'GPTCache', 'LiteLLM Cache', 'Spring Cache'],
                         enterpriseIntegration: {
                             gravitee: 'Gravitee Custom Cache Policy effectuant la recherche vectorielle Redis en amont du routing backend.',
@@ -1045,9 +1160,9 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         latencyImpact: 'Modéré',
                         shortDesc: 'Compression d’information du prompt en supprimant les mots à faible charge sémantique avant transmission au LLM.',
                         problem: 'Les invites et contextes RAG volumineux coûtent cher et ralentissent le temps de réponse (TTFT).',
-                        solution: 'Utilisation d’un modèle de compression d’information (ex: LLMLingua) pour élaguer jusqu’à 50% des tokens non essentiels.',
+                        solution: 'Utilisation d’un modèle de compression d’information (ex: LLMLingua) pour élaguer jusqu’à 50% des tokens non essentiels. Attention : risque de perte sémantique sur les tâches de raisonnement complexe.',
                         architectureDiagram: `Large Context + Prompt ──► LLMLingua Compressor ──► Pruned Prompt (50% smaller) ──► LLM API Call`,
-                        finopsDetails: 'Diminue la consommation de tokens de 30% à 50% sur les contextes documentaires très longs.',
+                        finopsDetails: 'Diminue la consommation de tokens de 30% à 50% sur les contextes documentaires très longs. Vérifier l’Information Retention Score avant déploiement généralisé.',
                         observabilityMetrics: ['Compression Ratio (%)', 'Information Retention Score', 'Cost Reduction ($)'],
                         tools: ['LLMLingua', 'CompactPrompt', 'Spring AI Transformers'],
                         enterpriseIntegration: {
@@ -1057,9 +1172,59 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         }
                     },
                     {
+                        id: 'cost-attribution-chargeback',
+                        name: 'Cost Attribution & Chargeback FinOps',
+                        category: 'finops',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'Very High',
+                        latencyImpact: 'Négligeable',
+                        shortDesc: 'Émission d’événements de coût par requête (tokens in/out, modèle, tenant, projet) pour chargeback et dashboards FinOps.',
+                        problem: 'Impossible de facturer les coûts LLM aux bonnes entités internes sans granularité par requête.',
+                        solution: 'Chaque appel LLM émet un événement structuré (tenant_id, project_id, model, tokens_in, tokens_out, cost_usd) vers Kafka, agrégé dans un entrepôt (ClickHouse, BigQuery) pour reporting.',
+                        architectureDiagram: `LLM Call ──► Response inclut usage metadata
+   ──► Émission événement Kafka [llm-cost-events]
+   ──► Agrégation Stream (Kafka Streams / Flink) par tenant/jour
+   ──► Entrepôt analytique ──► Dashboard FinOps (Grafana / Metabase)`,
+                        finopsDetails: 'Rend visible et facturable chaque dollar dépensé. Indispensable pour les organisations multi-BU ou SaaS multi-tenant.',
+                        observabilityMetrics: ['Cost per Tenant ($)', 'Cost per Project ($)', 'Cost per Model', 'Top Cost Spenders'],
+                        tools: ['Kafka Streams', 'ClickHouse', 'Grafana', 'OpenTelemetry Metrics'],
+                        enterpriseIntegration: {
+                            gravitee: 'Enrichissement des requêtes avec headers `X-Tenant-ID` et `X-Project-ID` depuis le JWT.',
+                            kafka: 'Topic `llm-cost-events` partitionné par tenant_id pour agrégation parallèle.',
+                            springBoot: 'Intercepteur Spring AI émettant un événement Kafka après chaque `ChatResponse` avec les métriques d’usage.'
+                        }
+                    },
+                    {
+                        id: 'graceful-degradation-fallback',
+                        name: 'Graceful Degradation & Fallback Chain',
+                        category: 'finops',
+                        complexity: 'Moyenne',
+                        finopsImpact: 'High',
+                        latencyImpact: 'Variable (dépend du fallback)',
+                        shortDesc: 'Chaîne de fallback ordonnée : LLM SOTA → SLM → Cache sémantique → Réponse template → Message d’erreur gracieux.',
+                        problem: 'Une panne API OpenAI ou un dépassement de quota ne doit pas rendre l’application totalement indisponible.',
+                        solution: 'Définir une hiérarchie de fallback avec circuit breakers (Resilience4j), timeouts différenciés et budget maximum par chaîne.',
+                        architectureDiagram: `Request ──► Circuit Breaker (Resilience4j)
+   ├─► [GPT-4o disponible]  ──► Réponse SOTA
+   ├─► [Timeout / Erreur]   ──► SLM On-Prem (Ollama)
+   ├─► [SLM indisponible]   ──► Semantic Cache (réponses passées)
+   ├─► [Cache miss]         ──► Réponse template ("Service temporairement dégradé")
+   └─► [Total failure]      ──► Message d’erreur gracieux avec ID de corrélation`,
+                        finopsDetails: 'Évite les pics de coût en cas de fallback (SLM gratuit en local) et garantit la disponibilité applicative.',
+                        observabilityMetrics: ['Fallback Rate by Level', 'Circuit Breaker State', 'Degraded Mode Duration', 'Fallback Cost Impact'],
+                        tools: ['Resilience4j', 'Ollama', 'Redis', 'Spring Retry'],
+                        enterpriseIntegration: {
+                            gravitee: 'Configuration des timeouts et du circuit breaking au niveau Gateway avant d’atteindre les microservices.',
+                            kafka: 'Émission sur `fallback-events` pour audit et déclenchement d’alertes NOC.',
+                            springBoot: 'Annotations `@CircuitBreaker`, `@Retry`, `@Bulkhead` de Resilience4j sur les appels LLM.'
+                        }
+                    },
+
+                    // --- CATEGORY: PERFORMANCE & INFERENCE ---
+                    {
                         id: 'speculative-decoding',
                         name: 'Speculative Decoding Pattern',
-                        category: 'finops',
+                        category: 'perf',
                         complexity: 'Élevée',
                         finopsImpact: 'Medium',
                         latencyImpact: 'Très Faible (2x-3x Speedup)',
@@ -1068,7 +1233,7 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         solution: 'Combinaison d’un SLM local ultra-rapide émettant 5 tokens et du LLM principal les validant en une seule passe matricielle.',
                         architectureDiagram: `Draft Model (SLM 1B) ──► Generates K candidate tokens fast
    ──► Target Model (LLM 70B) ──► Parallel Validation ──► Accept/Reject Tokens`,
-                        finopsDetails: 'Divise la latence par 2 à 3 à coût de calcul équivalent.',
+                        finopsDetails: 'Divise la latence par 2 à 3 à coût de calcul équivalent. Réserve principalement aux déploiements On-Prem avec contrôle du GPU.',
                         observabilityMetrics: ['Token Acceptance Rate (%)', 'Speedup Factor (x)', 'Latency Reduction'],
                         tools: ['vLLM Speculative Engine', 'TGI HuggingFace', 'Ollama Speculative'],
                         enterpriseIntegration: {
@@ -1158,7 +1323,7 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         solution: 'Un cluster S-LoRA / vLLM héberge 1 seul grand modèle de base et permute les adapteurs LoRA (quelques Mo) selon le client.',
                         architectureDiagram: `Request (Tenant: Legal) ──► Gateway ──► vLLM Base Model (Llama-3-70B)
    ──► Dynamic Load: [LoRA-Legal-Adapter.safetensors] ──► Tailored Answer`,
-                        finopsDetails: 'Division par 10 de l’empreinte infrastructure GPU en mutualisant le modèle de base.',
+                        finopsDetails: 'Division par 10 de l’empreinte infrastructure GPU en mutualisant le modèle de base. Attention : le swap d’adaptateur en mémoire GPU coûte 50-200ms selon la taille. Utiliser des sticky sessions par tenant pour minimiser les swaps.',
                         observabilityMetrics: ['LoRA Adapter Swap Time (ms)', 'GPU Memory Utilization', 'Multi-tenant Throughput'],
                         tools: ['vLLM S-LoRA', 'HuggingFace PEFT', 'Ollama Multi-LoRA'],
                         enterpriseIntegration: {
@@ -1233,6 +1398,7 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                         eval: 'bg-amber-950/80 text-amber-300 border border-amber-800/50',
                         obs: 'bg-purple-950/80 text-purple-300 border border-purple-800/50',
                         finops: 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/50',
+                        perf: 'bg-orange-950/80 text-orange-300 border border-orange-800/50',
                         agents: 'bg-pink-950/80 text-pink-300 border border-pink-800/50',
                         specialization: 'bg-indigo-950/80 text-indigo-300 border border-indigo-800/50',
                         security: 'bg-red-950/80 text-red-300 border border-red-800/50'
@@ -1265,75 +1431,14 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
                 resetFilters() {
                     this.searchQuery = '';
                     this.selectedCategory = 'ALL';
-                },
-
-                get filteredGlossary() {
-                    const q = this.glossarySearch.toLowerCase().trim();
-                    if (!q) return this.glossaryTerms;
-                    return this.glossaryTerms.filter(item => 
-                        item.term.toLowerCase().includes(q) || 
-                        item.category.toLowerCase().includes(q) || 
-                        item.definition.toLowerCase().includes(q) || 
-                        item.architectContext.toLowerCase().includes(q)
-                    );
-                },
-
-                // Helper Methods
-                getPattern(id) {
-                    return this.patterns.find(p => p.id === id) || {};
-                },
-
-                getCategoryName(catId) {
-                    const cat = this.categories.find(c => c.id === catId);
-                    return cat ? cat.name : catId;
-                },
-
-                getCategoryBadgeClass(catId) {
-                    const map = {
-                        rag: 'bg-blue-950/80 text-blue-300 border border-blue-800/50',
-                        eval: 'bg-amber-950/80 text-amber-300 border border-amber-800/50',
-                        obs: 'bg-purple-950/80 text-purple-300 border border-purple-800/50',
-                        finops: 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/50',
-                        agents: 'bg-pink-950/80 text-pink-300 border border-pink-800/50',
-                        specialization: 'bg-indigo-950/80 text-indigo-300 border border-indigo-800/50',
-                        security: 'bg-red-950/80 text-red-300 border border-red-800/50'
-                    };
-                    return map[catId] || 'bg-slate-800 text-slate-300';
-                },
-
-                toggleCompare(id) {
-                    if (this.selectedForCompare.includes(id)) {
-                        this.selectedForCompare = this.selectedForCompare.filter(i => i !== id);
-                    } else {
-                        if (this.selectedForCompare.length < 4) {
-                            this.selectedForCompare.push(id);
-                        } else {
-                            this.showToast("Maximum 4 patterns dans le comparateur");
-                        }
-                    }
-                },
-
-                openModal(pattern) {
-                    this.activePattern = pattern;
-                    this.isModalOpen = true;
-                },
-
-                closeModal() {
-                    this.isModalOpen = false;
-                    this.activePattern = null;
-                },
-
-                resetFilters() {
-                    this.searchQuery = '';
-                    this.selectedCategory = 'ALL';
-                    this.filterComplexity = '';
-                    this.filterFinops = '';
                 },
 
                 // FinOps Simulator Calculations
                 calculateRawCost() {
-                    const totalTokens = (this.finopsCalc.monthlyRequests * this.finopsCalc.avgTokensPerReq) / 1000000;
-                    return totalTokens * parseFloat(this.finopsCalc.baseModelCost) * 1000;
+                    // baseModelCost est exprimé en dollars pour 1 000 tokens
+                    // Exemple : 0.005 = $5 / 1M tokens = $0.005 / 1000 tokens
+                    const totalTokens = this.finopsCalc.monthlyRequests * this.finopsCalc.avgTokensPerReq;
+                    return (totalTokens / 1000) * parseFloat(this.finopsCalc.baseModelCost);
                 },
 
                 calculateOptimizedCost() {
@@ -1366,7 +1471,7 @@ User Query ──► Gravitee (JWT Claim Scope) ──► Vector Search with Met
 ## Implémentation Entreprise Stack Standard
 - **Gravitee API Gateway**: ${pattern.enterpriseIntegration.gravitee}
 - **Apache Kafka Stream**: ${pattern.enterpriseIntegration.kafka}
-- **Spring Boot 3 & Java Stack**: ${pattern.enterpriseIntegration.springBoot}
+- **Spring Boot & Java Stack**: ${pattern.enterpriseIntegration.springBoot}
 ` : '';
 
                     const adrText = `# Architecture Decision Record (ADR) - ${pattern.name}
